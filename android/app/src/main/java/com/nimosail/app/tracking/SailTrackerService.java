@@ -26,7 +26,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
 /**
- * Sail la Vie's own GPS recorder.
+ * NimoSail's own GPS recorder.
  *
  * A "foreground service": the thing that shows the ongoing "Recording your
  * journey" notification. While it runs, Android treats the app as in use and
@@ -96,7 +96,7 @@ public class SailTrackerService extends Service {
         if (intent != null) intervalMs = Math.max(1000, intent.getLongExtra("intervalMs", 1000));
 
         Notification notification = buildNotification(
-                title != null ? title : "Sail la Vie",
+                title != null ? title : "NimoSail",
                 text != null ? text : "Recording your journey");
         try {
             int type = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
@@ -138,7 +138,7 @@ public class SailTrackerService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID, "Journey recording", NotificationManager.IMPORTANCE_LOW); // LOW = silent, no buzzing
-            channel.setDescription("Shown while Sail la Vie is recording a journey");
+            channel.setDescription("Shown while NimoSail is recording a journey");
             NotificationManager nm = getSystemService(NotificationManager.class);
             if (nm != null) nm.createNotificationChannel(channel);
         }

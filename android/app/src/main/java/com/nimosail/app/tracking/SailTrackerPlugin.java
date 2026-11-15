@@ -99,7 +99,7 @@ public class SailTrackerPlugin extends Plugin {
 
     private void startService(PluginCall call) {
         Intent intent = new Intent(getContext(), SailTrackerService.class);
-        intent.putExtra("title", call.getString("title", "Sail la Vie"));
+        intent.putExtra("title", call.getString("title", "NimoSail"));
         intent.putExtra("text", call.getString("text", "Recording your journey"));
         intent.putExtra("intervalMs", (long) call.getInt("intervalMs", 1000));
         try {

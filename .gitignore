@@ -7,3 +7,7 @@ Claude outputs/
 *.jks
 *.keystore
 keystore.properties
+
+# Android Studio release build leftovers - rebuilt every release, not needed on GitHub
+android/app/release/output-metadata.json
+android/app/release/baselineProfiles/
