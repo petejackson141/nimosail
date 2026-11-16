@@ -1006,8 +1006,69 @@ function pushTripToCloud(trip){
 async function syncTripIfSignedIn(trip){
   if(!state.user) return;
   const result = await pushTripToCloud(trip);
-  if(!result.ok) console.error('background trip sync failed', result.message);
+  if(result.ok){ await tripUploadPendingRemove(trip.id); return; }
+  console.error('background trip sync failed', result.message);
+  // Most likely no signal (e.g. ending a sail out at sea). The sail is
+  // already safe on the phone; note its id so it gets uploaded as soon as
+  // the phone is back online or the app comes back to the front.
+  await tripUploadPendingAdd(trip.id);
 }
+
+/* ---------- sails waiting to upload (added 16 Nov 2026) ----------
+   Before this, a sail saved with no signal tried the cloud once, failed
+   quietly, and then just sat on the phone until the app was next started
+   fresh or "Sync Now" was tapped. Now each failed upload is remembered in
+   a small list (stored on the phone, so it survives the app being closed),
+   and the list is retried:
+     - when the phone reports it is back online ('online' event), and
+     - when the app comes back to the front (visibilitychange → visible),
+       in case the 'online' event was missed while the app was in the
+       background.
+   Same idea as the weather (sail-weather.js) and photos (photo-store.js),
+   which already retry the same way. Photos of the sail still upload
+   through photo-store.js's own retry. */
+const TRIP_UPLOAD_PENDING_KEY = 'tripUploadPending';
+let _tripRetryRunning = false;
+
+async function tripUploadPendingList(){
+  return (await storeGet(TRIP_UPLOAD_PENDING_KEY)) || [];
+}
+async function tripUploadPendingAdd(id){
+  const l = await tripUploadPendingList();
+  if(!l.includes(id)){ l.push(id); await storeSet(TRIP_UPLOAD_PENDING_KEY, l); }
+}
+async function tripUploadPendingRemove(id){
+  const l = await tripUploadPendingList();
+  if(l.includes(id)) await storeSet(TRIP_UPLOAD_PENDING_KEY, l.filter(x => x !== id));
+}
+
+// Push every sail on the waiting list. Stops at the first failure (still
+// no signal) and leaves the rest on the list for the next try.
+async function retryPendingTripUploads(){
+  if(!state.user || navigator.onLine === false || _tripRetryRunning) return;
+  _tripRetryRunning = true;
+  try{
+    const l = await tripUploadPendingList();
+    for(const id of l){
+      const trip = await storeGet('trip:' + id);
+      if(!trip){ await tripUploadPendingRemove(id); continue; } // deleted since
+      const result = await pushTripToCloud(trip);
+      if(!result.ok){ console.warn('pending trip upload still failing', id, result.message); break; }
+      await tripUploadPendingRemove(id);
+      debugLog(`[sync] pending trip ${id} uploaded after reconnect`);
+    }
+  }finally{
+    _tripRetryRunning = false;
+  }
+}
+// Short wait first: the 'online' event can fire a moment before the
+// connection is actually usable.
+window.addEventListener('online', () => setTimeout(retryPendingTripUploads, 2000));
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible') retryPendingTripUploads();
+});
+// Also once shortly after start-up (after boot() has settled), like sail-weather.js.
+window.addEventListener('load', () => setTimeout(retryPendingTripUploads, 5000));
 
 // Soft-delete (tombstone) — same reasoning as deleteBoatFromCloudImpl
 // above: a real SQL delete would be indistinguishable from "the cloud never

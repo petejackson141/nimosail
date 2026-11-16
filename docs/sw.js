@@ -39,7 +39,7 @@
   sees it. Supabase (and any other live API traffic) is now explicitly
   excluded from caching entirely, further down.
 */
-const CACHE_NAME = 'nimosail-shell-v84';
+const CACHE_NAME = 'nimosail-shell-v85';
 
 const APP_SHELL = [
   './',
