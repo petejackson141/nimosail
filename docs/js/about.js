@@ -36,6 +36,10 @@ const ANDROID_FROM_PLAY_STORE = true;
 
 // Newest first. Add a line here with each release worth telling people about.
 const WHATS_NEW = [
+  { version: '17.11.2026', items: [
+    'Sails saved with no signal now upload by themselves as soon as you are back in range, so you don\'t have to remember to open the app again.',
+    'NimoSail now updates through Google Play.'
+  ]},
   { version: '13.11.2026', items: [
     'Sail la Vie is now NimoSail: a new name and a new look. Sign in with the same email and password, and all your sails, boats, crew and photos are still there.',
     'The NimoSail app installs as a new app. Once you have signed in and checked your sails, you can uninstall the old Sail la Vie app.',
