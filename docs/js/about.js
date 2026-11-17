@@ -25,6 +25,15 @@ const TERMS_URL        = 'https://petejackson141.github.io/nimosail/terms.html';
 // points at it automatically. (Don't put the APK in docs/: cap sync would pack it into the app.)
 const ANDROID_APK_URL  = 'https://github.com/petejackson141/nimosail/releases/latest/download/nimosail.apk';
 
+// GOOGLE PLAY SWITCH (17.11.2026). The Android app now comes from Google Play,
+// and Play's rules say an app may only update itself through Play. So while
+// this is true, the Android app:
+//   - never runs the GitHub "Update available" check (checkForAppUpdate below)
+//   - hides the "Download for Android" row on the About page
+// The web version (iPhone, computer) is not affected.
+// Set to false only if you ever go back to handing out APKs from GitHub.
+const ANDROID_FROM_PLAY_STORE = true;
+
 // Newest first. Add a line here with each release worth telling people about.
 const WHATS_NEW = [
   { version: '13.11.2026', items: [
@@ -98,6 +107,8 @@ function initAboutPage(){
   // iPhone/iPad users can't install an APK, so hide the row for them.
   const androidRow = document.getElementById('aboutAndroidRow');
   if(androidRow && /iPhone|iPad|iPod/.test(navigator.userAgent || '')) androidRow.style.display = 'none';
+  // Inside the Play Store app, updates come from Google Play, so hide the APK download too.
+  if(androidRow && ANDROID_FROM_PLAY_STORE && _isAndroidApp()) androidRow.style.display = 'none';
   const emailRow = document.getElementById('aboutEmailRow');
   if(emailRow) emailRow.style.display = SUPPORT_EMAIL ? '' : 'none';
   const emailAlt = document.getElementById('contactEmailAlt');
@@ -150,6 +161,7 @@ function _markAboutUpdate(newVersion){
 
 async function checkForAppUpdate(){
   if(!_isAndroidApp() || !ANDROID_APK_URL) return;
+  if(ANDROID_FROM_PLAY_STORE) return; // Google Play handles updates (see the switch at the top)
   if(navigator.onLine === false) return;
   try{
     const ctrl = ('AbortController' in window) ? new AbortController() : null;
