@@ -8,6 +8,11 @@
    ---- Fill these in when you have them ----
    Leaving any of them '' is safe: the matching row shows a
    "Coming soon" tag (manual / privacy / terms) or is hidden (email).
+
+   17.11.2026: the "Download for Android" row (GitHub APK) and the in-app
+   "Update available" check were removed. Android now comes from Google Play,
+   which handles installs and updates. When NimoSail is public on Play, a
+   simple Google Play link can be added to the About page.
    ============================================================ */
 const COPYRIGHT_HOLDER = 'Pete Jackson';
 const COPYRIGHT_YEAR   = 2026;
@@ -20,22 +25,6 @@ const SUPPORT_EMAIL    = 'sailapp141@gmail.com';
 const USER_MANUAL_URL  = 'https://petejackson141.github.io/nimosail/NimoSail-User-Guide.pdf';
 const PRIVACY_URL      = 'https://petejackson141.github.io/nimosail/privacy.html';
 const TERMS_URL        = 'https://petejackson141.github.io/nimosail/terms.html';
-// Always the newest Android app. Publish each new build as a GitHub Release
-// with the APK attached and named exactly nimosail.apk; this link then
-// points at it automatically. (Don't put the APK in docs/: cap sync would pack it into the app.)
-const ANDROID_APK_URL  = 'https://github.com/petejackson141/nimosail/releases/latest/download/nimosail.apk';
-
-// GOOGLE PLAY SWITCH (17.11.2026). The Android app now comes from Google Play,
-// and Play's rules say an app may only update itself through Play. So while
-// this is true:
-//   - the Android app never runs the GitHub "Update available" check (checkForAppUpdate below)
-//   - the "Download for Android" row on the About page is hidden everywhere, in the
-//     Android app AND the web version (17.11.2026: so nobody installs a GitHub APK that
-//     would go stale and clash with the Play version's signing key)
-// Once NimoSail is public on Play, the row can come back as a Google Play link.
-// Set to false only if you ever go back to handing out APKs from GitHub.
-const ANDROID_FROM_PLAY_STORE = true;
-
 // Newest first. Add a line here with each release worth telling people about.
 const WHATS_NEW = [
   { version: '17.11.2026', items: [
@@ -108,13 +97,6 @@ function initAboutPage(){
   document.querySelectorAll('.manual-soon').forEach(el => { el.innerHTML = USER_MANUAL_URL ? '' : _soonTag(); });
   document.querySelectorAll('.privacy-soon').forEach(el => { el.innerHTML = PRIVACY_URL ? '' : _soonTag(); });
   document.querySelectorAll('.terms-soon').forEach(el => { el.innerHTML = TERMS_URL ? '' : _soonTag(); });
-  document.querySelectorAll('.android-soon').forEach(el => { el.innerHTML = ANDROID_APK_URL ? '' : _soonTag(); });
-  // iPhone/iPad users can't install an APK, so hide the row for them.
-  const androidRow = document.getElementById('aboutAndroidRow');
-  if(androidRow && /iPhone|iPad|iPod/.test(navigator.userAgent || '')) androidRow.style.display = 'none';
-  // Android now comes from Google Play, so the GitHub APK download is hidden everywhere
-  // (Android app, web version and iPhone). See the switch at the top.
-  if(androidRow && ANDROID_FROM_PLAY_STORE) androidRow.style.display = 'none';
   const emailRow = document.getElementById('aboutEmailRow');
   if(emailRow) emailRow.style.display = SUPPORT_EMAIL ? '' : 'none';
   const emailAlt = document.getElementById('contactEmailAlt');
@@ -128,84 +110,6 @@ function openUserManual(){
   if(!USER_MANUAL_URL){ showToast(t('about.manualSoon')); return; }
   openExternalUrl(USER_MANUAL_URL + '?v=' + encodeURIComponent(APP_VERSION));
 }
-function downloadAndroidApp(){
-  if(!ANDROID_APK_URL){ showToast(t('about.androidSoon')); return; }
-  showToast(t('about.downloading'));
-  openExternalUrl(ANDROID_APK_URL);
-}
-/* ---------- "Update available" check (Android app only) ----------
-   On launch, asks GitHub for the newest Release and compares its tag with
-   this build's APP_VERSION. If the release is newer, a prompt offers the
-   download, and the About row shows "Update available".
-   IMPORTANT when publishing: the release tag must be "v" + the APP_VERSION of
-   the APK you attach (e.g. v29.09.2026.0916 — the number shown in Settings).
-   "Later" hides the prompt for 24 hours; the About row keeps showing it. */
-const ANDROID_RELEASE_API = 'https://api.github.com/repos/petejackson141/nimosail/releases/latest';
-const UPDATE_SNOOZE_KEY   = 'sailUpdateSnooze';
-const UPDATE_SNOOZE_MS    = 24 * 60 * 60 * 1000;
-
-function _isAndroidApp(){
-  try{ return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()
-                 && window.Capacitor.getPlatform && window.Capacitor.getPlatform() === 'android'); }
-  catch(e){ return false; }
-}
-// "29.09.2026.0916" or "v29.09.2026.0916" -> 202609290916 (a comparable number). null if not a version.
-function _versionNumber(v){
-  const m = String(v || '').trim().replace(/^v/i, '').match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\.(\d{3,4}))?$/);
-  if(!m) return null;
-  const hhmm = (m[4] || '0000').padStart(4, '0');
-  return Number(m[3] + m[2].padStart(2, '0') + m[1].padStart(2, '0') + hhmm);
-}
-function _markAboutUpdate(newVersion){
-  const row = document.getElementById('aboutAndroidRow');
-  if(!row) return;
-  const sub = row.querySelector('.ab-sub');
-  if(sub){ sub.textContent = t('about.updateAvailableSub', {version: newVersion}); sub.style.color = 'var(--coral-deep)'; sub.style.fontWeight = '600'; }
-  const title = row.querySelector('.ab-title');
-  if(title) title.textContent = t('about.downloadUpdate');
-}
-
-async function checkForAppUpdate(){
-  if(!_isAndroidApp() || !ANDROID_APK_URL) return;
-  if(ANDROID_FROM_PLAY_STORE) return; // Google Play handles updates (see the switch at the top)
-  if(navigator.onLine === false) return;
-  try{
-    const ctrl = ('AbortController' in window) ? new AbortController() : null;
-    const timer = ctrl ? setTimeout(() => ctrl.abort(), 8000) : null;
-    const res = await fetch(ANDROID_RELEASE_API, {
-      cache: 'no-store',
-      headers: { 'Accept': 'application/vnd.github+json' },
-      signal: ctrl ? ctrl.signal : undefined
-    });
-    if(timer) clearTimeout(timer);
-    if(!res.ok) return; // no release yet (404) or GitHub busy: stay quiet
-    const rel = await res.json();
-    const latest = _versionNumber(rel && rel.tag_name);
-    const mine = _versionNumber(APP_VERSION);
-    if(!latest || !mine || latest <= mine) return;
-
-    const newVersion = String(rel.tag_name).replace(/^v/i, '');
-    _markAboutUpdate(newVersion);
-
-    // Snoozed recently for this same version? Don't pop up again yet.
-    try{
-      const snooze = JSON.parse(localStorage.getItem(UPDATE_SNOOZE_KEY) || 'null');
-      if(snooze && snooze.tag === rel.tag_name && (Date.now() - snooze.at) < UPDATE_SNOOZE_MS) return;
-    }catch(e){}
-
-    const ok = await showConfirm(
-      t('about.updateBody', {version: newVersion}),
-      { title: t('about.updateTitle'), okLabel: t('about.download'), cancelLabel: t('about.later'), icon: 'cloud' }
-    ).catch(() => false);
-    if(ok){ downloadAndroidApp(); }
-    else{
-      try{ localStorage.setItem(UPDATE_SNOOZE_KEY, JSON.stringify({ tag: rel.tag_name, at: Date.now() })); }catch(e){}
-    }
-  }catch(e){
-    console.warn('update check failed', e);
-  }
-}
-
 function openLegalLink(kind){
   const url = kind === 'privacy' ? PRIVACY_URL : TERMS_URL;
   if(!url){ showToast(kind === 'privacy' ? t('about.privacyLater') : t('about.termsLater')); return; }
@@ -371,5 +275,3 @@ async function sendContactMessage(){
 
 initAboutPage();
 setContactTopic('feedback');
-// Give the app a few seconds to finish opening before checking for updates.
-setTimeout(checkForAppUpdate, 4000);

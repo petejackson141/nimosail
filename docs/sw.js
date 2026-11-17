@@ -39,7 +39,7 @@
   sees it. Supabase (and any other live API traffic) is now explicitly
   excluded from caching entirely, further down.
 */
-const CACHE_NAME = 'nimosail-shell-v87';
+const CACHE_NAME = 'nimosail-shell-v88';
 
 const APP_SHELL = [
   './',
@@ -120,8 +120,6 @@ self.addEventListener('fetch', (event) => {
   // Open-Meteo (weather at Cast Off + the sail's weather report) is live data
   // too — a cached answer would be wrong or stuck, so it's never cached either.
   const isSupabase = url.hostname.endsWith('.supabase.co');
-  // GitHub's API answers the in-app "Update available" check (js/about.js) —
-  // a cached answer would hide new releases forever, so it's never cached.
   // Mapbox map data (styles, map tiles, fonts, icons) is fetched fresh by the map
   // itself — caching it here would bloat the phone's storage and Mapbox's terms
   // don't allow it. Only the version-pinned Mapbox library files (/mapbox-gl-js/)
@@ -130,7 +128,7 @@ self.addEventListener('fetch', (event) => {
   // OpenStreetMap's place lookup (auto place names, js/journey.js) is a live answer
   // for one position — caching it would hand every sail the first sail's place.
   const isPlaceLookup = url.hostname === 'nominatim.openstreetmap.org';
-  const isLiveApi = isSupabase || isMapboxData || isPlaceLookup || url.hostname.endsWith('open-meteo.com') || url.hostname === 'api.github.com';
+  const isLiveApi = isSupabase || isMapboxData || isPlaceLookup || url.hostname.endsWith('open-meteo.com');
   if (isLiveApi) {
     event.respondWith(fetch(req));
     return;
