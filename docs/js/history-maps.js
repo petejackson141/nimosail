@@ -576,8 +576,8 @@ function endpointDot(color){
    code like this, so it's fine in the GitHub repo.
    Since 02.11.2026 this is the "NimoSail app" token, locked (URL restrictions)
    to petejackson141.github.io (web version) and https://localhost (the Android app),
-   so it only works from those. The old unrestricted default token stays alive until
-   every Android tester has an APK with this one, then it can be deleted in Mapbox.
+   so it only works from those. The old unrestricted default token was deleted in
+   Mapbox on 13.11.2026, so this is the only token.
    A future iPhone app will need capacitor://localhost added to the token.
    Free tier: 50,000 map loads/month; one "load" = one map being created, no matter
    how much you zoom or pan it afterwards. */

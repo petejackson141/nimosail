@@ -16,7 +16,7 @@
    ============================================================ */
 const COPYRIGHT_HOLDER = 'Pete Jackson';
 const COPYRIGHT_YEAR   = 2026;
-const SUPPORT_EMAIL    = 'sailapp141@gmail.com';
+const SUPPORT_EMAIL    = 'support@nimosail.app'; // 17.11.2026: was sailapp141@gmail.com; support@ forwards there (Cloudflare Email Routing)
 // Always the live copy on GitHub Pages. To update the guide, replace
 // docs/NimoSail-User-Guide.pdf with the new file (same name) and push.
 // The button adds ?v=<app version> so phones fetch a fresh copy after each
