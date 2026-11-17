@@ -27,10 +27,12 @@ const ANDROID_APK_URL  = 'https://github.com/petejackson141/nimosail/releases/la
 
 // GOOGLE PLAY SWITCH (17.11.2026). The Android app now comes from Google Play,
 // and Play's rules say an app may only update itself through Play. So while
-// this is true, the Android app:
-//   - never runs the GitHub "Update available" check (checkForAppUpdate below)
-//   - hides the "Download for Android" row on the About page
-// The web version (iPhone, computer) is not affected.
+// this is true:
+//   - the Android app never runs the GitHub "Update available" check (checkForAppUpdate below)
+//   - the "Download for Android" row on the About page is hidden everywhere, in the
+//     Android app AND the web version (17.11.2026: so nobody installs a GitHub APK that
+//     would go stale and clash with the Play version's signing key)
+// Once NimoSail is public on Play, the row can come back as a Google Play link.
 // Set to false only if you ever go back to handing out APKs from GitHub.
 const ANDROID_FROM_PLAY_STORE = true;
 
@@ -76,7 +78,6 @@ const WHATS_NEW = [
     'Privacy policy and terms of use added.',
     'Delete your account from Settings → Account.',
     'Send feedback, report a problem or suggest a feature straight from the app.',
-    'Download the latest Android version from Settings → Help & About → About.',
     'An account is now needed to use the app, and you choose a username when you first sign in.',
     'Usernames can now have spaces and capitals, like “Pete Jackson”.'
   ]},
@@ -111,8 +112,9 @@ function initAboutPage(){
   // iPhone/iPad users can't install an APK, so hide the row for them.
   const androidRow = document.getElementById('aboutAndroidRow');
   if(androidRow && /iPhone|iPad|iPod/.test(navigator.userAgent || '')) androidRow.style.display = 'none';
-  // Inside the Play Store app, updates come from Google Play, so hide the APK download too.
-  if(androidRow && ANDROID_FROM_PLAY_STORE && _isAndroidApp()) androidRow.style.display = 'none';
+  // Android now comes from Google Play, so the GitHub APK download is hidden everywhere
+  // (Android app, web version and iPhone). See the switch at the top.
+  if(androidRow && ANDROID_FROM_PLAY_STORE) androidRow.style.display = 'none';
   const emailRow = document.getElementById('aboutEmailRow');
   if(emailRow) emailRow.style.display = SUPPORT_EMAIL ? '' : 'none';
   const emailAlt = document.getElementById('contactEmailAlt');
