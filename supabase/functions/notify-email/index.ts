@@ -24,6 +24,11 @@
 //   ALERT_EMAIL     optional - where to send, default sailapp141@gmail.com
 // SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
 //
+// 18.11.2026: email subjects can't contain line breaks (Resend refuses them
+// with a 422), so the subject now turns any line break into a space. Before
+// this, a Contact us message with an early line break, and every report from
+// the Report button (topic "report"), was saved but never emailed.
+//
 // Deploy: Supabase -> Edge Functions -> Deploy a new function -> Via editor,
 // name it notify-email, paste this whole file, and turn OFF
 // "Verify JWT" (the secret header does that job instead).
@@ -84,6 +89,7 @@ async function sendFeedback(id: string) {
 
   const topicLabel: Record<string, string> = {
     feedback: "Feedback", problem: "Problem", idea: "Idea", other: "Other",
+    report: "Report",  // the Report button: a sailor or a sail reported (18.11.2026)
   };
   const topic = topicLabel[fb.topic] ?? fb.topic;
 
@@ -100,7 +106,7 @@ async function sendFeedback(id: string) {
     </table>`;
 
   await sendEmail({
-    subject: `NimoSail ${topic}: ${fb.message.slice(0, 60)}${fb.message.length > 60 ? "…" : ""}`,
+    subject: `NimoSail ${topic}: ${oneLine(fb.message, 60)}`,
     html,
     reply_to: replyTo ?? undefined,
     attachments,
@@ -181,6 +187,13 @@ async function sendEmail(msg: { subject: string; html: string; reply_to?: string
     body: JSON.stringify({ from: FROM, to: [ALERT_EMAIL], ...msg }),
   });
   if (!res.ok) throw new Error("Resend said " + res.status + ": " + await res.text());
+}
+
+// An email subject must be a single line: squash line breaks and extra spaces,
+// then cut to max characters
+function oneLine(s: string, max: number) {
+  const flat = String(s ?? "").replace(/\s+/g, " ").trim();
+  return flat.length > max ? flat.slice(0, max) + "…" : flat;
 }
 
 // text from users goes into the email as plain text, never as HTML

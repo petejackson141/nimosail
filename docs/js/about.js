@@ -28,7 +28,8 @@ const TERMS_URL        = 'https://petejackson141.github.io/nimosail/terms.html';
 // Newest first. Add a line here with each release worth telling people about.
 const WHATS_NEW = [
   { version: '18.11.2026', items: [
-    'You can now report a sailor or a sail that breaks the rules, and block anyone you don\'t want contact with. Open their profile and tap Report or Block. Blocked sailors are listed in Settings › Account.'
+    'You can now report a sailor or a sail that breaks the rules, and block anyone you don\'t want contact with. Open their profile and tap Report or Block. Blocked sailors are listed in Settings › Account.',
+    'Signing out now removes your logbook from this phone, so the next person to sign in on it only sees their own. It comes back when you sign in again. If a sail hasn\'t uploaded yet, NimoSail warns you first.'
   ]},
   { version: '17.11.2026', items: [
     'Sails saved with no signal now upload by themselves as soon as you are back in range, so you don\'t have to remember to open the app again.',

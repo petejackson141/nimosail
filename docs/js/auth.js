@@ -80,7 +80,10 @@ function getSupabaseClient(){
 // resolve* — which is waiting on that same push — finishes).
 let _cloudSyncQueue = Promise.resolve();
 function withCloudSyncQueue(fn){
-  const run = _cloudSyncQueue.then(fn, fn);
+  // Before anything syncs, make sure the logbook on this phone belongs to the
+  // person signed in now (see ensureLocalDataOwner below, 18.11.2026).
+  const guarded = async () => { await ensureLocalDataOwner(); return fn(); };
+  const run = _cloudSyncQueue.then(guarded, guarded);
   _cloudSyncQueue = run.catch(()=>{}); // swallow so one failure doesn't wedge the queue
   return run;
 }
@@ -650,10 +653,84 @@ async function submitNewPassword(){
 }
 
 async function signOutUser(){
+  // A sail being recorded lives only on this phone until it's saved: finish it first.
+  if(typeof currentTrip !== 'undefined' && currentTrip){ showToast(t('acct.signOutRecording')); return; }
   if(!(await confirmDialog('signOut', {icon:'logout'}))) return;
+  // Signing out removes the logbook from this phone (below), so first try to
+  // upload any sails still waiting for signal, and warn if some still can't.
+  await retryPendingTripUploads();
+  const waiting = (await tripUploadPendingList()).length;
+  if(waiting && !(await confirmDialog('signOutPending', {danger:true, icon:'logout', vars:{n: waiting}}))) return;
   if(typeof removePushToken === 'function') await removePushToken(); // push.js: stop pushes to this phone (needs the session, so before signOut)
   await getSupabaseClient().auth.signOut();
+  await clearLocalAccountData();
   showToast(t('acct.signedOut'));
+}
+
+/* ---------- one account's logbook per phone (18.11.2026) ----------
+   NimoSail keeps a copy of the logbook on the phone so it works with no signal.
+   Before this, signing out left that copy behind, and the next account to sign in
+   on the same phone saw it and had it merged into theirs on this phone. Now:
+     - signing out clears the copy (signOutUser above, after warning about any
+       sails still waiting to upload), and
+     - the phone remembers whose copy it holds (LOCAL_OWNER_KEY). If a different
+       account signs in (or a sign-out happened some other way, e.g. a session
+       ended), the old copy is cleared before anything syncs, and the new
+       account's logbook is loaded fresh from the cloud.
+   Kept: this phone's own settings (theme, units, language, map and PDF styles).
+   A phone updated from an older version has no owner yet: whoever is signed in
+   then becomes the owner of what's there. */
+const LOCAL_OWNER_KEY = 'localDataOwner';
+let _localOwnerConfirmed = null; // user id already checked this session
+async function ensureLocalDataOwner(){
+  if(!state.user) return;
+  const me = state.user.id;
+  if(_localOwnerConfirmed === me) return;
+  const owner = await storeGet(LOCAL_OWNER_KEY);
+  if(owner && owner !== me){
+    console.warn('logbook on this phone belongs to another account - clearing it before sync');
+    await clearLocalAccountData();
+  }
+  await storeSet(LOCAL_OWNER_KEY, me);
+  _localOwnerConfirmed = me;
+}
+async function clearLocalAccountData(){
+  const index = (await storeGet(KEYS.INDEX)) || state.tripIndex || [];
+  for(const entry of index){
+    await storeDelete('trip:' + entry.id);
+    await storeDelete('thumb:' + entry.id);
+  }
+  for(const key of [KEYS.INDEX, KEYS.BOATS, KEYS.CREW, KEYS.NOTICEBOARD, KEYS.ACTIVE_TRIP,
+                    TRIP_UPLOAD_PENDING_KEY, WX_PENDING_KEY, LOCAL_OWNER_KEY]){
+    await storeDelete(key);
+  }
+  // The profile goes too, except this phone's display settings
+  const p = state.profile || {};
+  const profile = { name:'', role:'', license:'', phone:'', email:'', social:'', bio:'', avatar:'', cover:'',
+                    theme: p.theme || 'light', unitSystem: p.unitSystem || 'nautical', language: p.language || currentLang || 'en' };
+  await storeSet(KEYS.PROFILE, profile);
+  state.tripIndex = []; state.boats = []; state.crew = []; state.noticeboard = []; state.profile = profile;
+  _localOwnerConfirmed = null;
+  await clearPhotoCacheOnPhone();
+  if(typeof syncNoticeboardReminders === 'function') syncNoticeboardReminders(); // cancel the old account's plan reminders
+  for(const fn of ['renderHistory','renderHomeStats','renderBoats','renderCrew','renderNoticeboard','renderProfileScreen','refreshAvatars']){
+    try{ if(typeof window[fn] === 'function') window[fn](); }catch(e){ console.warn(fn + ' after clearing failed', e); }
+  }
+}
+// Downloaded photos kept on the phone (photo-store.js) belong to the old account too
+async function clearPhotoCacheOnPhone(){
+  try{
+    if(typeof _photoMemCache !== 'undefined') _photoMemCache.clear();
+    if(typeof _photoUrls !== 'undefined'){ _photoUrls.forEach(u => { try{ URL.revokeObjectURL(u); }catch(e){} }); _photoUrls.clear(); }
+    const db = (typeof photoDb === 'function') ? await photoDb() : null;
+    if(db) await new Promise((resolve)=>{
+      try{
+        const tx = db.transaction('photos', 'readwrite');
+        tx.objectStore('photos').clear();
+        tx.oncomplete = tx.onerror = tx.onabort = () => resolve();
+      }catch(e){ resolve(); }
+    });
+  }catch(e){ console.warn('photo cache clear failed', e); }
 }
 
 /* ---------- profile ↔ cloud resolution on sign-in ----------
