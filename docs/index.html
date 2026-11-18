@@ -1788,6 +1788,16 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
     <div id="friendBody"></div>
   </section>
 
+  <!-- ============ BLOCKED SAILORS (js/friends.js, 18.11.2026) ============ -->
+  <section class="screen" id="screen-blocked">
+    <div class="backrow">
+      <div class="iconbtn back-icon" onclick="nav('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div>
+      <h2 data-i18n="block.screenTitle">Blocked sailors</h2>
+    </div>
+    <p class="fr-hint" style="text-align:left;padding:0 4px 12px;" data-i18n="block.screenHint">People you've blocked can't find you, send you friend requests or send you sails. Unblocking doesn't make you friends again.</p>
+    <div id="blockedList"></div>
+  </section>
+
   <!-- ============ SETTINGS ============ -->
   <section class="screen" id="screen-settings">
     <div class="backrow">
@@ -1806,6 +1816,7 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
         <p style="font-weight:600;font-size:14.5px;margin-bottom:14px;" id="accountEmailLine"></p>
         <button class="btn btn-outline" id="syncProfileBtn" style="margin-bottom:10px;" onclick="manualSyncProfile()" data-i18n="acct.syncNow">Sync Now</button>
         <button class="btn btn-outline" onclick="signOutUser()" data-i18n="acct.signOut">Sign Out</button>
+        <div class="link-plain" style="text-align:center;margin-top:14px;" onclick="openBlockedSailors()" data-i18n="block.settingsLink">Blocked sailors</div>
         <div class="link-plain" style="color:var(--coral);text-align:center;margin-top:14px;" onclick="openDeleteAccountSheet()" data-i18n="acct.deleteLink">Delete account…</div>
       </div>
     </div>

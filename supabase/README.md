@@ -34,6 +34,7 @@ They're kept as a record of what was changed and why.
 | `email-alerts.sql` | Email alerts: new Contact us feedback emailed straight away, daily error summary at 06:00 UTC, through the `notify-email` Edge Function and Resend (4 November 2026) — run on Frankfurt (4 November 2026) |
 | `push-notifications.sql` | Push notifications: the `push_tokens` table, `register_push_token` / `unregister_push_token`, and triggers on `sail_shares` and `friendships` that call the `send-push` Edge Function (5 November 2026) — run on Frankfurt (push tested 5 November 2026; iPhone web push needed no database change, 7 November) |
 | `keep-alive.sql` | The one-row `keep_alive` table the GitHub keep-alive job reads twice a week, so the free-plan project is never paused for inactivity. The only table signed-out "anon" may read (no user data in it) (6 November 2026) — run on Frankfurt (confirmed 6 November 2026: the keep-alive job's first green run read the `keep_alive` row) |
+| `block-and-report.sql` | Block and report (Google Play's user-generated content rules): the `blocks` table, `block_user()`, `is_blocked()` / `has_blocked_me()`, no friend requests or sent sails between blocked people, a blocker hidden from the blocked person's search, and the `report` topic on feedback, so reports email Pete like Contact us (18 November 2026) — **run this on Frankfurt before releasing 18.11.2026.0620** |
 
 ## Keep-alive job
 

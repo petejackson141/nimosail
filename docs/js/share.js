@@ -241,7 +241,8 @@ function renderIncomingSails(){
     const date = d.date ? new Date(d.date).toLocaleDateString(currentLocale(), {day:'numeric', month:'short', year:'numeric'}) : '';
     return `<div class="incoming-sail">
       <div class="incoming-sail-txt"><b>${t('share.incomingTitle', {name: escapeHtml(s.sender_name || t('default.sailorName'))})}</b>
-        <span>${escapeHtml(d.title || '')}${date ? ' · ' + date : ''}${d.distanceNm ? ' · ' + fmtDistance(d.distanceNm) : ''}</span></div>
+        <span>${escapeHtml(d.title || '')}${date ? ' · ' + date : ''}${d.distanceNm ? ' · ' + fmtDistance(d.distanceNm) : ''}</span>
+        ${typeof openReportSheet === 'function' ? `<span class="incoming-sail-report" onclick="reportIncomingSail('${safeId(s.id)}')">${t('report.sailLink')}</span>` : ''}</div>
       <div class="incoming-sail-btns">
         <button class="btn btn-primary btn-sm" onclick="acceptIncomingSail('${safeId(s.id)}')">${t('share.add')}</button>
         <button class="btn btn-outline btn-sm" onclick="declineIncomingSail('${safeId(s.id)}')">${t('share.decline')}</button>
@@ -301,6 +302,11 @@ async function declineAllIncomingFrom(senderId){
   const gone = new Set(list.map(s=>s.id));
   incomingSails = incomingSails.filter(x=>!gone.has(x.id));
   renderIncomingSails();
+}
+// "Report this sail" on a sail a friend sent (18.11.2026, block and report in friends.js)
+function reportIncomingSail(shareId){
+  const s = incomingSails.find(x=>x.id===shareId); if(!s) return;
+  openReportSheet({ userId: s.sender_id, name: s.sender_name || null, tripId: s.trip_id, tripTitle: (s.data||{}).title || '' });
 }
 async function declineIncomingSail(shareId){
   if(!(await showConfirm(t('share.declineConfirm'), {title: t('share.decline'), okLabel: t('share.decline'), icon:'trash'}))) return;

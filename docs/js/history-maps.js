@@ -280,6 +280,8 @@ async function openTripDetail(id, from, friendView){
 
     ${trip.photos && trip.photos.length ? `<div class="section-title">${t('active.photos')}</div><div class="photo-strip">${trip.photos.map((p,i)=>`<div class="photo-thumb" onclick="openTripPhotoLightbox(${i})"><img src="${safeSrc(p)}"></div>`).join('')}</div>` : ''}
 
+    ${friendView && friendView.ownerId && typeof openReportSheet === 'function'
+      ? `<div class="fr-safety"><div class="link-plain" onclick="openReportSheet({userId:'${safeId(friendView.ownerId)}', tripId:'${safeId(friendView.tripId||'')}', tripTitle: (window._detailTrip||{}).title || ''})">${t('report.sailLink')}</div></div>` : ''}
     ${friendView ? '' : `<div style="height:8px;"></div>
     <button class="btn btn-outline" onclick="openShareSheet()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.9M8.6 13.4l6.8 3.9"/></svg>

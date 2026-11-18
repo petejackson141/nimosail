@@ -14,6 +14,16 @@
 // Screens:
 //   screen-friends — your username, search for sailors, requests, your friends
 //   screen-friend  — one friend's page: their card + the sails they shared
+//   screen-blocked — Settings › Blocked sailors (18.11.2026)
+//
+// BLOCK AND REPORT (18.11.2026, supabase/block-and-report.sql). Google Play's
+// user-generated content policy expects users to be able to block and report.
+//   • Block: block_user() adds the block and removes any friendship, request and
+//     unadded sent sails between the two. The database then refuses new requests
+//     and sails between them, and hides the blocker from the blocked person's search.
+//   • Report: a "Contact us" message (feedback table) with topic 'report', so it
+//     emails Pete straight away (email-alerts.sql). Pete reviews each report and can
+//     remove content or close an account that breaks the Terms of Use.
 // A friend's sail opens in the normal trip detail screen in read-only mode
 // (see openTripDetail(id, from, friendView) in history-maps.js).
 //
@@ -118,6 +128,37 @@ Object.assign(TRANSLATIONS.en, {
   'plan.chipFriends': '👥 Friends can see this',
   'plan.sharedTag': '👥 Shared',
   'friends.upcomingPlans': 'Upcoming plans',
+  // Block and report (18.11.2026)
+  'block.link': 'Block {name}',
+  'block.blockedHint': "You've blocked {name}. They can't find you, send you friend requests or send you sails.",
+  'block.unblock': 'Unblock',
+  'block.done': '{name} is blocked',
+  'block.undone': '{name} is unblocked',
+  'block.settingsLink': 'Blocked sailors',
+  'block.screenTitle': 'Blocked sailors',
+  'block.screenHint': "People you've blocked can't find you, send you friend requests or send you sails. Unblocking doesn't make you friends again.",
+  'block.none': "You haven't blocked anyone.",
+  'dlg.blockUser.title': 'Block {name}?',
+  'dlg.blockUser.body': "They won't be able to find you, send you friend requests or send you sails. If you're friends, you'll stop being friends. They aren't told.",
+  'dlg.blockUser.ok': 'Block',
+  'report.link': 'Report {name}',
+  'report.sailLink': 'Report this sail',
+  'report.title': 'Report {name}',
+  'report.sailTitle': 'Report this sail',
+  'report.why': 'What is wrong?',
+  'report.rPhoto': 'Inappropriate photo',
+  'report.rText': 'Offensive or abusive text',
+  'report.rHarass': 'Harassment or unwanted contact',
+  'report.rSpam': 'Spam or fake account',
+  'report.rOther': 'Something else',
+  'report.detailsPh': 'Anything that helps us look into it (optional)',
+  'report.send': 'Send report',
+  'report.cancel': 'Cancel',
+  'report.pickReason': 'Choose what is wrong first.',
+  'report.sent': "Thanks. We'll look into it.",
+  'report.failed': "Couldn't send the report. Check your connection and try again.",
+  'report.offline': "You're offline. Connect to the internet to send a report.",
+  'report.alsoBlock': 'Also block {name}',
 });
 
 // Hebrew (added 24.10.2026 — to be checked by a native speaker)
@@ -204,6 +245,37 @@ Object.assign(TRANSLATIONS.he, {
   'plan.chipFriends': '👥 גלוי לחברים',
   'plan.sharedTag': '👥 משותף',
   'friends.upcomingPlans': 'תוכניות קרובות',
+  // חסימה ודיווח (18.11.2026)
+  'block.link': 'חסימת {name}',
+  'block.blockedHint': 'חסמתם את {name}. הם לא יכולים למצוא אתכם, לשלוח לכם בקשות חברות או לשלוח לכם הפלגות.',
+  'block.unblock': 'ביטול חסימה',
+  'block.done': '{name} נחסם/ה',
+  'block.undone': 'החסימה של {name} בוטלה',
+  'block.settingsLink': 'מלחים חסומים',
+  'block.screenTitle': 'מלחים חסומים',
+  'block.screenHint': 'מי שחסמתם לא יכול למצוא אתכם, לשלוח לכם בקשות חברות או לשלוח לכם הפלגות. ביטול חסימה לא מחזיר את החברות.',
+  'block.none': 'לא חסמתם אף אחד.',
+  'dlg.blockUser.title': 'לחסום את {name}?',
+  'dlg.blockUser.body': 'הם לא יוכלו למצוא אתכם, לשלוח לכם בקשות חברות או לשלוח לכם הפלגות. אם אתם חברים, החברות תוסר. הם לא יקבלו הודעה על כך.',
+  'dlg.blockUser.ok': 'חסימה',
+  'report.link': 'דיווח על {name}',
+  'report.sailLink': 'דיווח על ההפלגה הזו',
+  'report.title': 'דיווח על {name}',
+  'report.sailTitle': 'דיווח על ההפלגה הזו',
+  'report.why': 'מה הבעיה?',
+  'report.rPhoto': 'תמונה לא הולמת',
+  'report.rText': 'טקסט פוגעני או מעליב',
+  'report.rHarass': 'הטרדה או פנייה לא רצויה',
+  'report.rSpam': 'ספאם או חשבון מזויף',
+  'report.rOther': 'משהו אחר',
+  'report.detailsPh': 'כל פרט שיעזור לנו לבדוק (לא חובה)',
+  'report.send': 'שליחת דיווח',
+  'report.cancel': 'ביטול',
+  'report.pickReason': 'קודם בחרו מה הבעיה.',
+  'report.sent': 'תודה. נבדוק את זה.',
+  'report.failed': 'לא הצלחנו לשלוח את הדיווח. בדקו את החיבור ונסו שוב.',
+  'report.offline': 'אין חיבור לאינטרנט. התחברו כדי לשלוח דיווח.',
+  'report.alsoBlock': 'לחסום גם את {name}',
 });
 
 
@@ -212,6 +284,7 @@ CONFIRM_ICONS.users = '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.4 2.7-6
 
 let _friendsReloadQueued = false;
 let friendsState = { loaded:false, loading:false, failed:false, me:null, rows:[], people:{} };
+let myBlocks = { ids:new Set(), loaded:false };   // people I've blocked (18.11.2026)
 let friendUsernameEditing = false;   // true while the "change username" form is open
 let openFriendId = null;             // whose page screen-friend is showing
 let friendPageFrom = 'friends';      // screen the friend page's back arrow returns to
@@ -220,6 +293,7 @@ let allSailors = { list:null, loading:false, failed:false };
 
 function resetFriendsState(){
   friendsState = { loaded:false, loading:false, failed:false, me:null, rows:[], people:{} };
+  myBlocks = { ids:new Set(), loaded:false };
   friendUsernameEditing = false;
   allSailors = { list:null, loading:false, failed:false };
 }
@@ -248,14 +322,19 @@ async function loadFriendsData(){
   let unchanged = false;
   try{
     const sb = getSupabaseClient();
-    const [mine, rel] = await Promise.all([
+    const [mine, rel, blk] = await Promise.all([
       sb.from('public_profiles').select('user_id,username,display_name,avatar_url').eq('user_id', me).maybeSingle(),
-      sb.from('friendships').select('id,requester_id,addressee_id,status,created_at')
+      sb.from('friendships').select('id,requester_id,addressee_id,status,created_at'),
+      sb.from('blocks').select('blocked_id')
     ]);
     if(mine.error) throw mine.error;
     if(rel.error) throw rel.error;
+    // Blocks: if the table isn't there yet (block-and-report.sql not run), carry on without them
+    if(blk.error) console.warn('blocks load failed', blk.error);
+    else myBlocks = { ids: new Set((blk.data||[]).map(b=>b.blocked_id)), loaded:true };
     const rows = rel.data || [];
-    const otherIds = [...new Set(rows.map(r=> r.requester_id===me ? r.addressee_id : r.requester_id))];
+    // Everyone on the other side of a friendship row, plus people I've blocked (for Blocked sailors)
+    const otherIds = [...new Set([...rows.map(r=> r.requester_id===me ? r.addressee_id : r.requester_id), ...myBlocks.ids])];
     const people = {};
     if(otherIds.length){
       const { data, error } = await sb.from('public_profiles')
@@ -499,7 +578,7 @@ async function runFriendSearch(){
       const { data, error } = await getSupabaseClient().rpc('find_sailor_by_email', { p_email: q });
       if(error) throw error;
       if(input.value.trim().replace(/^@/, '') !== q) return;
-      _friendSearchResults = data || [];
+      _friendSearchResults = (data || []).filter(p=>!myBlocks.ids.has(p.user_id));
       if(!_friendSearchResults.length){ box.innerHTML = `<div class="fr-hint">${t('friends.emailNotFound')}</div>`; return; }
       rerenderFriendSearch();
     }catch(e){
@@ -521,7 +600,7 @@ async function runFriendSearch(){
     if(input.value.trim().replace(/^@/, '') !== q) return; // typed on since — a newer search will draw
     const seen = new Map();
     [...(byUser.data||[]), ...(byName.data||[])].forEach(p=>seen.set(p.user_id, p));
-    _friendSearchResults = [...seen.values()];
+    _friendSearchResults = [...seen.values()].filter(p=>!myBlocks.ids.has(p.user_id));
     rerenderFriendSearch();
   }catch(e){
     console.error('friend search failed', e);
@@ -669,8 +748,8 @@ function renderFriendsScreen(){
   let html = '';
   if(incoming.length){
     html += `<div class="section-title">${t('friends.requests')}</div>` + incoming.map(r=>friendRowHtml(P(r.requester_id),
-      `<button class="btn btn-primary btn-sm" onclick="acceptFriendRequest('${r.id}')">${t('friends.accept')}</button>
-       <button class="btn btn-outline btn-sm" onclick="deleteFriendship('${r.id}')">${t('friends.decline')}</button>`, '')).join('');
+      `<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();acceptFriendRequest('${r.id}')">${t('friends.accept')}</button>
+       <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();deleteFriendship('${r.id}')">${t('friends.decline')}</button>`, `openFriendPage('${safeId(r.requester_id)}')`)).join('');
   }
   if(outgoing.length){
     html += `<div class="section-title">${t('friends.sent')}</div>` + outgoing.map(r=>friendRowHtml(P(r.addressee_id),
@@ -843,8 +922,13 @@ function renderFriendPage(){
   document.getElementById('friendTitle').textContent = name;
   const row = friendshipWith(openFriendId);
   const isFriend = !!(row && row.status==='accepted');
+  const blockedByMe = myBlocks.ids.has(openFriendId);
   let sails;
-  if(!isFriend){
+  if(blockedByMe){
+    sails = `<div class="fr-hint" style="padding:14px 4px;">${t('block.blockedHint', {name: escapeHtml(name)})}</div>
+      <button class="btn btn-outline" onclick="unblockUser('${safeId(openFriendId)}')">${t('block.unblock')}</button>`;
+  }
+  else if(!isFriend){
     // Not friends (yet): no sails to show — the database wouldn't return them anyway.
     let action;
     if(!friendsState.me) action = `<button class="btn btn-primary" onclick="nav('friends')">${t('friends.chooseTitle')}</button>`;
@@ -907,14 +991,18 @@ function renderFriendPage(){
     <div class="section-divider pf"><span>${t('friends.sharedSails')}</span></div>
     ${sails}
     ${isFriend && typeof crewLinkOnFriendPageHtml === 'function' ? crewLinkOnFriendPageHtml(openFriendId) : ''}
-    ${isFriend ? `<div class="link-plain" style="color:var(--coral);text-align:center;margin-top:22px;" onclick="removeFriendPrompt('${safeId(openFriendId)}')">${t('friends.remove')}</div>` : ''}`;
+    ${isFriend && !blockedByMe ? `<div class="link-plain" style="color:var(--coral);text-align:center;margin-top:22px;" onclick="removeFriendPrompt('${safeId(openFriendId)}')">${t('friends.remove')}</div>` : ''}
+    <div class="fr-safety">
+      <div class="link-plain" onclick="openReportSheet({userId:'${safeId(openFriendId)}'})">${t('report.link', {name: escapeHtml(name)})}</div>
+      ${blockedByMe ? '' : `<div class="link-plain" onclick="blockUserPrompt('${safeId(openFriendId)}')">${t('block.link', {name: escapeHtml(name)})}</div>`}
+    </div>`;
 }
 async function openFriendTrip(tripId){
   try{
     const { data, error } = await getSupabaseClient().from('trips').select('data').eq('id', tripId).single();
     if(error) throw error;
     const p = personById(openFriendId) || {};
-    openTripDetail(null, 'friend', { trip: data.data, ownerName: personName(p) });
+    openTripDetail(null, 'friend', { trip: data.data, ownerName: personName(p), ownerId: openFriendId, tripId });
   }catch(e){
     console.error('friend trip load failed', e);
     showToast(t('toast.tripLoadFail'));
@@ -954,3 +1042,173 @@ async function toggleTripVisibility(){
   showToast(trip.visibility === 'friends' ? t('vis.nowFriends') : t('vis.nowPrivate'));
   syncTripIfSignedIn(trip);
 }
+
+/* ---------- block and report (18.11.2026) ----------
+   Needs supabase/block-and-report.sql. See the note at the top of this file. */
+CONFIRM_ICONS.block = '<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>';
+
+async function blockUserPrompt(userId){
+  if(!state.user || !userId) return;
+  const name = personName(personById(userId));
+  if(!(await confirmDialog('blockUser', {danger:true, icon:'block', vars:{name}}))) return;
+  return blockUser(userId, true);
+}
+async function blockUser(userId, toast){
+  const name = personName(personById(userId));
+  const { error } = await getSupabaseClient().rpc('block_user', { p_user: userId });
+  if(error){ console.error('block failed', error); showToast(t('friends.actionFailed')); return false; }
+  myBlocks.ids.add(userId);
+  // Sails they'd sent me that I hadn't added are gone from the database; drop them here too
+  if(typeof incomingSails !== 'undefined' && Array.isArray(incomingSails)){
+    incomingSails = incomingSails.filter(s=>s.sender_id!==userId);
+    if(typeof renderIncomingSails === 'function') renderIncomingSails();
+  }
+  if(toast) showToast(t('block.done', {name}));
+  await loadFriendsData();
+  if(_friendSearchResults) _friendSearchResults = _friendSearchResults.filter(p=>p.user_id!==userId);
+  rerenderFriendSearch();
+  refreshFriendsUI();
+  return true;
+}
+async function unblockUser(userId){
+  const name = personName(personById(userId));
+  const { error } = await getSupabaseClient().from('blocks').delete().eq('blocker_id', state.user.id).eq('blocked_id', userId);
+  if(error){ console.error('unblock failed', error); showToast(t('friends.actionFailed')); return; }
+  myBlocks.ids.delete(userId);
+  showToast(t('block.undone', {name}));
+  await loadFriendsData();
+  refreshFriendsUI();
+  renderBlockedScreen();
+}
+
+// Settings › Account › Blocked sailors
+function openBlockedSailors(){
+  if(!state.user) return;
+  nav('blocked');
+  renderBlockedScreen();
+  if(!friendsState.loading) loadFriendsData().then(renderBlockedScreen);
+}
+function renderBlockedScreen(){
+  const el = document.getElementById('blockedList');
+  if(!el || !state.user) return;
+  const ids = [...myBlocks.ids];
+  if(!friendsState.loaded && !myBlocks.loaded){ el.innerHTML = `<div class="fr-hint">${t('friends.loading')}</div>`; return; }
+  el.innerHTML = ids.length
+    ? ids.map(id=>personById(id) || {user_id:id})
+        .sort((a,b)=>personName(a).localeCompare(personName(b)))
+        .map(p=>friendRowHtml(p, `<button class="btn btn-outline btn-sm" onclick="unblockUser('${safeId(p.user_id)}')">${t('block.unblock')}</button>`, '')).join('')
+    : `<div class="fr-hint" style="padding:14px 4px;">${t('block.none')}</div>`;
+}
+
+// Report a sailor, or one of their sails.
+//   target = { userId, tripId?, tripTitle? }  (userId = the person being reported)
+// Sent as a "Contact us" message with topic 'report'; the email reaches Pete straight away.
+let _reportState = null;
+const REPORT_REASONS = ['rPhoto', 'rText', 'rHarass', 'rSpam', 'rOther'];
+function openReportSheet(target){
+  if(!state.user || !target || !target.userId) return;
+  if(document.getElementById('reportOverlay')) return;
+  ensureReportStyles();
+  const person = personById(target.userId) || {};
+  const name = target.name || personName(person);
+  _reportState = { ...target, name, username: person.username || '', reason: null, sending: false };
+  const already = myBlocks.ids.has(target.userId);
+  const overlay = document.createElement('div');
+  overlay.className = 'rs-overlay';
+  overlay.id = 'reportOverlay';
+  overlay.innerHTML = `
+    <div class="rs-card" role="dialog" aria-modal="true">
+      <p class="rs-title">${escapeHtml(target.tripId ? t('report.sailTitle') : t('report.title', {name}))}</p>
+      <p class="rs-sub">${escapeHtml(t('report.why'))}</p>
+      <div class="rs-reasons">${REPORT_REASONS.map(r=>`<button type="button" class="rs-reason" data-r="${r}" onclick="pickReportReason('${r}')">${escapeHtml(t('report.'+r))}</button>`).join('')}</div>
+      <textarea id="reportDetails" maxlength="1500" rows="3" placeholder="${escapeHtml(t('report.detailsPh'))}"></textarea>
+      ${already ? '' : `<label class="rs-block"><input type="checkbox" id="reportAlsoBlock"> ${escapeHtml(t('report.alsoBlock', {name}))}</label>`}
+      <div class="rs-actions">
+        <button class="btn btn-outline" onclick="closeReportSheet()">${escapeHtml(t('report.cancel'))}</button>
+        <button class="btn btn-danger" id="reportSendBtn" onclick="sendReport()">${escapeHtml(t('report.send'))}</button>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) closeReportSheet(); });
+  document.body.appendChild(overlay);
+  requestAnimationFrame(()=>overlay.classList.add('show'));
+}
+function pickReportReason(r){
+  if(!_reportState) return;
+  _reportState.reason = r;
+  document.querySelectorAll('#reportOverlay .rs-reason').forEach(b=>b.classList.toggle('on', b.dataset.r===r));
+}
+function closeReportSheet(){
+  const o = document.getElementById('reportOverlay');
+  if(o){ o.classList.remove('show'); setTimeout(()=>o.remove(), 200); }
+  _reportState = null;
+}
+async function sendReport(){
+  const st = _reportState;
+  if(!st || st.sending) return;
+  if(!st.reason){ showToast(t('report.pickReason')); return; }
+  if(navigator.onLine === false){ showToast(t('report.offline')); return; }
+  const details = (document.getElementById('reportDetails').value || '').trim();
+  const alsoBlock = !!(document.getElementById('reportAlsoBlock') || {}).checked;
+  // Written in English whatever the app language, so Pete can always read it.
+  const reasonEn = { rPhoto:'Inappropriate photo', rText:'Offensive or abusive text', rHarass:'Harassment or unwanted contact', rSpam:'Spam or fake account', rOther:'Something else' }[st.reason];
+  const who = (st.username ? '@'+st.username : st.name) + (st.username && st.name && st.name!==st.username ? ' ('+st.name+')' : '');
+  const message = [
+    `Reported ${st.tripId ? 'sail by ' : ''}${who}: ${reasonEn}`,
+    `Reported user id: ${st.userId}`,
+    st.tripId ? `Sail: ${st.tripTitle || '(no title)'} (id ${st.tripId})` : null,
+    `Details: ${details || '(none)'}`,
+    alsoBlock ? 'The reporter also blocked them.' : null
+  ].filter(Boolean).join('\n');
+  st.sending = true;
+  const btn = document.getElementById('reportSendBtn');
+  if(btn) btn.disabled = true;
+  try{
+    const { error } = await getSupabaseClient().from('feedback').insert({
+      user_id: state.user.id, email: state.user.email || null, topic: 'report',
+      message, app_version: APP_VERSION, device: null
+    });
+    if(error) throw error;
+    closeReportSheet();
+    showToast(t('report.sent'));
+    if(alsoBlock){
+      await blockUser(st.userId, false);
+      const scr = (document.querySelector('.screen.active')||{}).id;
+      if(scr==='screen-detail' && window._friendDetail) nav('friend');
+    }
+  }catch(e){
+    console.warn('report send failed', e);
+    showToast(t('report.failed'));
+    st.sending = false;
+    if(btn) btn.disabled = false;
+  }
+}
+function ensureReportStyles(){
+  if(document.getElementById('reportStyles')) return;
+  const style = document.createElement('style');
+  style.id = 'reportStyles';
+  style.textContent = `
+    .rs-overlay{position:fixed;inset:0;z-index:9990;padding:24px;
+      background:rgba(10,22,34,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+      display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .18s ease;}
+    .rs-overlay.show{opacity:1;}
+    .rs-card{width:100%;max-width:360px;max-height:90vh;overflow:auto;padding:22px 20px 18px;
+      background:var(--surface-ivory, var(--bg-elevated));color:var(--ink);
+      border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);}
+    .rs-title{margin:0 0 4px;font-family:var(--font-display);font-size:19px;font-weight:600;line-height:1.3;color:var(--ink);}
+    .rs-sub{margin:0 0 12px;font-size:14px;color:var(--ink-muted);}
+    .rs-reasons{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+    .rs-reason{text-align:start;padding:11px 13px;border-radius:12px;border:1.5px solid var(--border);
+      background:transparent;color:var(--ink);font:inherit;font-size:14.5px;cursor:pointer;}
+    .rs-reason.on{border-color:var(--teal);background:color-mix(in srgb, var(--teal) 12%, transparent);font-weight:600;}
+    .rs-card textarea{width:100%;box-sizing:border-box;font:inherit;font-size:14.5px;padding:10px 12px;
+      border-radius:12px;border:1.5px solid var(--border);background:transparent;color:var(--ink);resize:vertical;}
+    .rs-block{display:flex;align-items:center;gap:8px;margin:12px 0 2px;font-size:14px;color:var(--ink);}
+    .rs-actions{display:flex;gap:10px;margin-top:16px;}
+    .rs-actions .btn{padding:13px 12px;font-size:15px;flex:1;min-width:0;box-shadow:none;}
+    .fr-safety{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin:18px 0 8px;}
+    .fr-safety .link-plain{color:var(--ink-muted);font-size:13.5px;}
+    .incoming-sail-report{margin-top:6px;font-size:12.5px;color:var(--ink-muted);text-decoration:underline;cursor:pointer;}
+  `;
+  document.head.appendChild(style);
+}
+ensureReportStyles(); // .fr-safety is used on the friend page before any report is opened

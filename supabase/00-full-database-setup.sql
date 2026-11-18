@@ -10,7 +10,8 @@
 --   profile-photos.sql (20.10.2026), sail-shares.sql (30.10.2026), advisor-tidy-up.sql,
 --   error-reports.sql and find-by-email.sql (02.11.2026), and email-alerts.sql
 --   (04.11.2026, section 5b), and push-notifications.sql (05.11.2026, section 5c),
---   and keep-alive.sql (06.11.2026).
+--   and keep-alive.sql (06.11.2026), and block-and-report.sql (18.11.2026: the
+--   blocks table, block_user(), is_blocked() and the 'report' feedback topic).
 --   Checked against the live
 --   Frankfurt database on 04.11.2026: all tables, columns, grants, policies,
 --   functions, triggers, realtime and the photo bucket matched.
@@ -133,7 +134,7 @@ create table if not exists public.feedback (          -- the About page's "Conta
   id           uuid primary key default gen_random_uuid(),
   user_id      uuid default auth.uid() references auth.users(id) on delete set null,
   topic        text not null default 'feedback'
-               constraint feedback_topic_check check (topic in ('feedback', 'problem', 'idea', 'other')),
+               constraint feedback_topic_check check (topic in ('feedback', 'problem', 'idea', 'other', 'report')),  -- 'report' added 18.11.2026
   message      text not null
                constraint feedback_message_check check (char_length(message) between 1 and 5000),
   email        text,
@@ -153,6 +154,15 @@ create table if not exists public.sail_shares (       -- "send a sail to a frien
   data          jsonb not null,                -- the copy of the sail
   created_at    timestamptz not null default now(),
   constraint sail_shares_not_self check (sender_id <> recipient_id)
+);
+
+-- blocks: "this person blocked that person" (Block button, js/friends.js), added 18.11.2026
+create table if not exists public.blocks (
+  blocker_id  uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  blocked_id  uuid not null references auth.users(id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  primary key (blocker_id, blocked_id),
+  constraint blocks_not_self check (blocker_id <> blocked_id)
 );
 
 create table if not exists public.error_reports (     -- crash / error reporting (js/error-report.js), added 02.11.2026
@@ -194,6 +204,7 @@ create index if not exists sail_shares_sender_idx        on public.sail_shares (
 create index if not exists error_reports_created_idx     on public.error_reports (created_at desc);
 create index if not exists error_reports_user_id_idx     on public.error_reports (user_id);
 create index if not exists feedback_user_id_idx          on public.feedback (user_id);
+create index if not exists blocks_blocked_id_idx         on public.blocks (blocked_id);
 
 
 -- ---------------------------------------------------------------------
@@ -215,7 +226,7 @@ create index if not exists feedback_user_id_idx          on public.feedback (use
 -- back exactly what the app needs
 revoke all on public.profiles, public.public_profiles, public.boats, public.crew,
               public.trips, public.noticeboard, public.friendships, public.feedback, public.sail_shares,
-              public.error_reports, public.keep_alive
+              public.error_reports, public.keep_alive, public.blocks
   from anon, authenticated;
 
 grant select, insert, update         on public.profiles        to authenticated;
@@ -227,12 +238,13 @@ grant select, insert, update, delete on public.noticeboard     to authenticated;
 grant select, insert, delete         on public.friendships     to authenticated;  -- accepting goes through accept_friend_request()
 grant insert                         on public.feedback        to authenticated;  -- send only, never read back
 grant select, insert, delete         on public.sail_shares     to authenticated;  -- added 30.10.2026
+grant select, insert, delete         on public.blocks          to authenticated;  -- added 18.11.2026
 grant insert                         on public.error_reports   to authenticated;  -- send only, never read back (02.11.2026)
 grant select                         on public.keep_alive      to anon;           -- the ONE signed-out exception: the keep-alive job reads this empty table (06.11.2026)
 
 grant all on public.profiles, public.public_profiles, public.boats, public.crew,
              public.trips, public.noticeboard, public.friendships, public.feedback, public.sail_shares,
-             public.error_reports, public.keep_alive
+             public.error_reports, public.keep_alive, public.blocks
   to service_role;
 
 
@@ -257,6 +269,28 @@ as $$
           and ((requester_id = a and addressee_id = b)
             or (requester_id = b and addressee_id = a))
      );
+$$;
+
+-- Has either of these two blocked the other? Only answers if YOU are one of them (18.11.2026).
+create or replace function private.is_blocked(a uuid, b uuid)
+returns boolean language sql stable security definer set search_path = ''
+as $$
+  select auth.uid() in (a, b)
+     and exists (
+       select 1 from public.blocks
+        where (blocker_id = a and blocked_id = b)
+           or (blocker_id = b and blocked_id = a)
+     );
+$$;
+
+-- Has this person blocked ME? Hides their public card from me (18.11.2026).
+create or replace function private.has_blocked_me(other uuid)
+returns boolean language sql stable security definer set search_path = ''
+as $$
+  select exists (
+    select 1 from public.blocks
+     where blocker_id = other and blocked_id = auth.uid()
+  );
 $$;
 
 -- May the signed-in user see this photo? Yes if it's theirs, if it belongs to
@@ -325,7 +359,29 @@ as $$
      set status = 'accepted', updated_at = now()
    where id = request_id
      and addressee_id = auth.uid()
-     and status = 'pending';
+     and status = 'pending'
+     and not private.is_blocked(requester_id, addressee_id);  -- 18.11.2026
+$$;
+
+-- "Block" button (js/friends.js, 18.11.2026): adds the block, removes any friendship
+-- or request between you, and any sails either of you sent the other that weren't added yet.
+create or replace function public.block_user(p_user uuid)
+returns void language plpgsql security definer set search_path = ''
+as $$
+declare
+  me uuid := auth.uid();
+begin
+  if me is null then raise exception 'Not signed in'; end if;
+  if p_user is null or p_user = me then raise exception 'Invalid user'; end if;
+  insert into public.blocks (blocker_id, blocked_id) values (me, p_user)
+    on conflict do nothing;
+  delete from public.friendships
+   where (requester_id = me and addressee_id = p_user)
+      or (requester_id = p_user and addressee_id = me);
+  delete from public.sail_shares
+   where (sender_id = me and recipient_id = p_user)
+      or (sender_id = p_user and recipient_id = me);
+end;
 $$;
 
 -- "Delete account" in Settings. The app deletes the user's photos from storage
@@ -365,6 +421,8 @@ as $$
   where auth.uid() is not null
     and u.id <> auth.uid()
     and lower(u.email) = lower(trim(p_email))
+    and not exists (select 1 from public.blocks b                -- 18.11.2026
+                     where b.blocker_id = p.user_id and b.blocked_id = auth.uid())
   limit 1;
 $$;
 
@@ -380,6 +438,12 @@ grant execute on function private.are_friends(uuid, uuid)    to authenticated;
 grant execute on function private.can_view_trip_photo(text)  to authenticated;
 grant execute on function public.accept_friend_request(uuid) to authenticated;
 grant execute on function public.delete_my_account()         to authenticated;
+revoke all on function private.is_blocked(uuid, uuid)       from public, anon;
+revoke all on function private.has_blocked_me(uuid)         from public, anon;
+revoke all on function public.block_user(uuid)              from public, anon;
+grant execute on function private.is_blocked(uuid, uuid)     to authenticated;
+grant execute on function private.has_blocked_me(uuid)       to authenticated;
+grant execute on function public.block_user(uuid)            to authenticated;
 
 
 -- ---------------------------------------------------------------------
@@ -399,6 +463,7 @@ alter table public.sail_shares     enable row level security;
 
 alter table public.error_reports enable row level security;
 alter table public.keep_alive    enable row level security;
+alter table public.blocks        enable row level security;
 
 -- Rules written as (select auth.uid()) and one read rule per table, as the
 -- Performance Advisor asks (02.11.2026, advisor-tidy-up.sql). First remove any
@@ -410,7 +475,7 @@ begin
     select policyname, tablename from pg_policies
     where schemaname = 'public'
       and tablename in ('profiles','public_profiles','boats','crew','trips','noticeboard',
-                        'friendships','feedback','sail_shares','error_reports','keep_alive')
+                        'friendships','feedback','sail_shares','error_reports','keep_alive','blocks')
   loop
     execute format('drop policy %I on public.%I', p.policyname, p.tablename);
   end loop;
@@ -433,8 +498,8 @@ create policy profiles_update on public.profiles
   for update to authenticated using (id = (select auth.uid())) with check (id = (select auth.uid()));
 
 -- public_profiles: every signed-in user can see name / username / small photo
-create policy public_profiles_select on public.public_profiles
-  for select to authenticated using (true);
+create policy public_profiles_select on public.public_profiles   -- not someone who has blocked you (18.11.2026)
+  for select to authenticated using (not private.has_blocked_me(user_id));
 create policy public_profiles_insert on public.public_profiles
   for insert to authenticated with check (user_id = (select auth.uid()));
 create policy public_profiles_update on public.public_profiles
@@ -483,7 +548,8 @@ create policy noticeboard_delete on public.noticeboard for delete to authenticat
 create policy friendships_select on public.friendships
   for select to authenticated using ((select auth.uid()) in (requester_id, addressee_id));
 create policy friendships_insert on public.friendships
-  for insert to authenticated with check (requester_id = (select auth.uid()) and status = 'pending');
+  for insert to authenticated with check (requester_id = (select auth.uid()) and status = 'pending'
+                                          and not private.is_blocked(requester_id, addressee_id));  -- 18.11.2026
 create policy friendships_delete on public.friendships
   for delete to authenticated using ((select auth.uid()) in (requester_id, addressee_id));
 
@@ -494,11 +560,20 @@ create policy feedback_insert on public.feedback
 -- sail_shares: friends send each other a copy of a sail; only sender and receiver see it
 create policy sail_shares_insert on public.sail_shares
   for insert to authenticated
-  with check (sender_id = (select auth.uid()) and private.are_friends((select auth.uid()), recipient_id));
+  with check (sender_id = (select auth.uid()) and private.are_friends((select auth.uid()), recipient_id)
+              and not private.is_blocked((select auth.uid()), recipient_id));  -- 18.11.2026
 create policy sail_shares_select on public.sail_shares
   for select to authenticated using ((select auth.uid()) in (sender_id, recipient_id));
 create policy sail_shares_delete on public.sail_shares
   for delete to authenticated using ((select auth.uid()) in (sender_id, recipient_id));
+
+-- blocks: only the person who blocked sees, adds or removes their own blocks (18.11.2026)
+create policy blocks_select on public.blocks
+  for select to authenticated using (blocker_id = (select auth.uid()));
+create policy blocks_insert on public.blocks
+  for insert to authenticated with check (blocker_id = (select auth.uid()));
+create policy blocks_delete on public.blocks
+  for delete to authenticated using (blocker_id = (select auth.uid()));
 
 -- error_reports: you can send your own, nobody can read them back through the app
 create policy error_reports_insert on public.error_reports
