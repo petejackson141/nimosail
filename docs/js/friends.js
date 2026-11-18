@@ -296,6 +296,15 @@ function resetFriendsState(){
   myBlocks = { ids:new Set(), loaded:false };
   friendUsernameEditing = false;
   allSailors = { list:null, loading:false, failed:false };
+  // 18.11.2026: also forget the last account's search and which friend's page or
+  // shared sail was open, so the next account to sign in never sees them.
+  openFriendId = null;
+  window._friendDetail = null;
+  if(typeof _friendSearchTimer !== 'undefined'){ clearTimeout(_friendSearchTimer); _friendSearchResults = null; }
+  const input = document.getElementById('friendSearchInput');
+  if(input) input.value = '';
+  const results = document.getElementById('friendSearchResults');
+  if(results) results.innerHTML = '';
 }
 
 /* ---------- derived lists ---------- */

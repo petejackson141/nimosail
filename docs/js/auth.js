@@ -242,7 +242,11 @@ async function initAuth(){
 }
 
 function applySession(session){
+  const hadUser = !!state.user;
   state.user = session ? { id: session.user.id, email: session.user.email } : null;
+  // Signed out: go back to Home (under the welcome gate), so whoever signs in
+  // next starts there and not on the last person's screens (18.11.2026)
+  if(hadUser && !session && typeof nav === 'function') nav('home');
   renderAccountUI();
   ensureRealtimeSync();
   if(typeof onFriendsSessionChanged === 'function') onFriendsSessionChanged(); // friends.js
