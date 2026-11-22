@@ -14,7 +14,7 @@
 const KEYS = { INDEX:'trip-index', BOATS:'boats', CREW:'crew', PROFILE:'profile', ACTIVE_TRIP:'active-trip', VIEW_PREFS:'view-prefs', NOTICEBOARD:'noticeboard' };
 
 const LS_PREFIX = 'nimosail:';
-const IDB_NAME = 'nimosail-db';   // was 'sail-la-vie:' / 'sail-la-vie-db' until 11.11.2026, see migrateOldAppStorage()
+const IDB_NAME = 'nimosail-db';   // was 'sail-la-vie:' / 'sail-la-vie-db' until 11.11.2026; the one-time move code was removed 22.11.2026 once every tester had opened NimoSail
 const IDB_STORE = 'kv';
 
 let memoryStore = {};       // always-on session fallback, keyed same as chosen tier
@@ -73,10 +73,8 @@ function lsAvailable(){
 }
 
 // Picks the best available tier once at boot. Called from boot() before any load/save.
-// After picking, moves any data left under the old app name across (see below).
 async function initStorage(){
   await chooseStorageTier();
-  await migrateOldAppStorage();
 }
 async function chooseStorageTier(){
   try{
@@ -99,89 +97,6 @@ async function chooseStorageTier(){
     storageTier = 'memory';
     showPersistentStorageError();
   }
-}
-
-// ---------- ONE-TIME MOVE FROM THE OLD APP NAME (added 11.11.2026) ----------
-// Before the rename to NimoSail, everything on the device was saved under
-// "sail-la-vie" names. migrateOldAppStorage() copies anything still saved under
-// the old names into the new ones (never overwriting newer data), then deletes
-// the old copies. Once it has run there is nothing old left, so on later starts
-// it finds nothing and does nothing. Safe to remove once every tester has opened
-// a NimoSail version at least once.
-const OLD_LS_PREFIX = 'sail-la-vie:';
-const OLD_IDB_NAME = 'sail-la-vie-db';
-const OLD_PHOTO_DB_NAME = 'sail-la-vie-photos';
-
-// Opens the old logbook database ONLY if it already exists. Opening a database
-// that doesn't exist would normally create it, so if this turns out to be a
-// brand-new one (oldVersion 0) we cancel straight away and report "none".
-function openOldIDB(){
-  return new Promise((resolve)=>{
-    try{
-      if(!('indexedDB' in window)){ resolve(null); return; }
-      const req = indexedDB.open(OLD_IDB_NAME);
-      req.onupgradeneeded = (e)=>{ if(e.oldVersion === 0) req.transaction.abort(); };
-      req.onsuccess = ()=>{
-        const db = req.result;
-        if(!db.objectStoreNames.contains(IDB_STORE)){ db.close(); resolve(null); return; }
-        resolve(db);
-      };
-      req.onerror = ()=> resolve(null);
-      req.onblocked = ()=> resolve(null);
-    }catch(e){ resolve(null); }
-  });
-}
-// Reads every key + value from the old database.
-function readAllOldIDB(db){
-  return new Promise((resolve)=>{
-    try{
-      const store = db.transaction(IDB_STORE,'readonly').objectStore(IDB_STORE);
-      const keysReq = store.getAllKeys();
-      const valsReq = store.getAll();
-      valsReq.onsuccess = ()=> resolve(keysReq.result.map((k,i)=>[k, valsReq.result[i]]));
-      valsReq.onerror = ()=> resolve(null);
-    }catch(e){ resolve(null); }
-  });
-}
-// Copies one old item across unless the new storage already has something there.
-// Returns false only if the copy was needed and failed.
-async function copyOldItem(key, value){
-  if(key === '__slv_probe__') return true;          // leftover test entry, not real data
-  if((await storeGet(key)) !== null) return true;   // new storage already has it: keep the newer one
-  return await storeSet(key, value);
-}
-async function migrateOldAppStorage(){
-  if(storageTier === 'memory') return;   // nowhere safe to copy to, so leave the old data alone
-  // 1. The old logbook database (IndexedDB)
-  try{
-    const oldDb = await openOldIDB();
-    if(oldDb){
-      const entries = await readAllOldIDB(oldDb);
-      let allCopied = !!entries;
-      for(const [key, value] of (entries || [])){
-        if(!(await copyOldItem(key, value))) allCopied = false;
-      }
-      oldDb.close();
-      if(allCopied) indexedDB.deleteDatabase(OLD_IDB_NAME);   // only delete once everything is safe
-    }
-  }catch(e){ console.error('old storage move (IndexedDB) failed', e); }
-  // 2. The old localStorage fallback ("sail-la-vie:<key>")
-  try{
-    const oldKeys = [];
-    for(let i = 0; i < localStorage.length; i++){
-      const k = localStorage.key(i);
-      if(k && k.startsWith(OLD_LS_PREFIX)) oldKeys.push(k);
-    }
-    for(const k of oldKeys){
-      let value = null;
-      try{ value = JSON.parse(localStorage.getItem(k)); }catch(e){ continue; }
-      if(await copyOldItem(k.slice(OLD_LS_PREFIX.length), value)) localStorage.removeItem(k);
-    }
-    localStorage.removeItem('__slv_test__');
-  }catch(e){ console.error('old storage move (localStorage) failed', e); }
-  // 3. The old offline photo cache. It only ever held copies of photos that are
-  //    already in the cloud, so it's simply deleted; photos re-download when viewed.
-  try{ indexedDB.deleteDatabase(OLD_PHOTO_DB_NAME); }catch(e){}
 }
 
 // storeGet / storeSet / storeDelete are the ONLY storage functions the rest of

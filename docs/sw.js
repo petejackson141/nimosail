@@ -96,7 +96,7 @@ self.addEventListener('activate', (event) => {
         // Only remove THIS app's old caches. Other apps on petejackson141.github.io
         // (Interval Studio, Master GMDSS...) share the same cache storage, so
         // deleting every other name would wipe their offline copies too.
-        names.filter((n) => n !== CACHE_NAME && (n.startsWith('nimosail-shell-') || n.startsWith('sail-la-vie-shell-')))
+        names.filter((n) => n !== CACHE_NAME && n.startsWith('nimosail-shell-'))
              .map((n) => caches.delete(n))
       )
     ).then(() => self.clients.claim())
