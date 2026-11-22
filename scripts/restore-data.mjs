@@ -149,8 +149,12 @@ console.log(`  ${made} created, ${already} already there`);
 // ---------- 4. Tables ----------
 console.log('\n2/4 Tables');
 for(const t of TABLES){
-  const rows = tableRows[t];
+  let rows = tableRows[t];
   if(!rows){ console.log(`  ${t}: skipped (not in backup)`); continue; }
+  // Columns removed from the database since older backups were made (22.11.2026).
+  // Older backups still have them, so leave them out or Supabase refuses the rows.
+  const DROPPED = { profiles: ['avatar_url', 'boat_name'] };
+  if(DROPPED[t]) rows = rows.map(r => { const c = { ...r }; for(const k of DROPPED[t]) delete c[k]; return c; });
   const size = t === 'feedback' ? 20 : 200;   // feedback rows can hold big screenshots
   for(let i = 0; i < rows.length; i += size){
     const r = await call(`/rest/v1/${t}`, {

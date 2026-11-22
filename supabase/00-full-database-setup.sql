@@ -61,8 +61,7 @@ create table if not exists public.profiles (
   id            uuid primary key references auth.users(id) on delete cascade,
   display_name  text,
   profile_data  jsonb,                 -- the full profile (name, bio, phone, photos...)
-  avatar_url    text,                  -- old, unused by the app
-  boat_name     text,                  -- old, unused by the app
+                                       -- (old avatar_url and boat_name columns removed 22 Nov 2026)
   created_at    timestamptz default now()
 );
 
@@ -101,7 +100,7 @@ create table if not exists public.trips (
   user_id     uuid not null references auth.users(id),
   data        jsonb not null,
   visibility  text not null default 'private'
-              constraint trips_visibility_check check (visibility in ('private', 'friends', 'public')),
+              constraint trips_visibility_check check (visibility in ('private', 'friends')),
   updated_at  timestamptz not null default now(),
   deleted_at  timestamptz
 );
@@ -520,8 +519,8 @@ create policy trips_select on public.trips
   for select to authenticated using (
     user_id = (select auth.uid())
     or (deleted_at is null
-        and (visibility = 'public'
-             or (visibility = 'friends' and private.are_friends((select auth.uid()), user_id))))
+        and visibility = 'friends'
+        and private.are_friends((select auth.uid()), user_id))
   );
 create policy trips_insert on public.trips for insert to authenticated with check (user_id = (select auth.uid()));
 create policy trips_update on public.trips for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
