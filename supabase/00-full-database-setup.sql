@@ -847,7 +847,7 @@ create trigger friendships_push after insert or update on public.friendships
 
 -- ---------------------------------------------------------------------
 -- 6. CHECK
---    Should list 12 tables, all with rls_enabled = true, and app_access
+--    Should list 13 tables (blocks added 18.11.2026), all with rls_enabled = true, and app_access
 --    showing the actions from section 1b (feedback and error_reports = INSERT only;
 --    push_tokens = empty, the app uses register_push_token / unregister_push_token;
 --    keep_alive = empty, only signed-out "anon" may read it).

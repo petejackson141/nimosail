@@ -34,7 +34,7 @@ const LIVE_URL    = 'https://lccwbkarqjohunofsghd.supabase.co';   // the current
 const KEY_FILE    = 'C:\\Users\\Pete\\NimoSail-keys\\restore-target-secret-key.txt';
 const BACKUP_ROOT = process.env.NMS_BACKUP_ROOT || 'C:\\Users\\Pete\\NimoSail-backups';
 // Order matters: accounts first, then tables that point at them.
-const TABLES      = ['profiles', 'public_profiles', 'boats', 'crew', 'trips', 'noticeboard', 'friendships', 'sail_shares', 'feedback'];   // sail_shares added 04.11.2026
+const TABLES      = ['profiles', 'public_profiles', 'boats', 'crew', 'trips', 'noticeboard', 'friendships', 'sail_shares', 'feedback', 'blocks'];   // sail_shares added 04.11.2026, blocks 23.11.2026 (older backups have no blocks: skipped)
 const BUCKET      = 'trip-photos';
 const MIME        = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' };
 
