@@ -4,6 +4,7 @@
 //   - icons and drawing bits the trip PDF (js/trip-pdf.js) and certificate use
 //   - shareOrDownloadFile(): share a file on the phone, or download it on a computer
 //   - escapeHtml(): makes text safe to put inside the page
+//   - isNetworkError(): true when a request failed because there's no signal (25.11.2026)
 // The photo viewer that used to live here is now js/photo-viewer.js.
 
 
@@ -141,4 +142,16 @@ async function shareOrDownloadFile(blob, fileName, mimeType, title, downloadedTo
 /* ---------- utils ---------- */
 function escapeHtml(s){
   return (s||'').toString().replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+// True when a request failed because it never reached the server (no signal,
+// e.g. out at sea) rather than because of a real bug. The catch blocks for
+// cloud sync use it to log these with console.warn instead of console.error,
+// so they stay out of the daily error email (error-report.js only collects
+// console.error). Accepts an Error or a plain message string. Covers the
+// wording of Chrome/Android ("Failed to fetch"), Firefox ("NetworkError")
+// and Safari/iOS ("Load failed"). (25.11.2026)
+function isNetworkError(e){
+  const msg = (e && e.message) || String(e || '');
+  return /Failed to fetch|NetworkError|Load failed|Network request failed/i.test(msg);
 }

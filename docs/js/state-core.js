@@ -9,7 +9,7 @@
 // caching mess a few pushes back, where nobody could tell whether an old
 // build was still stuck on someone's phone. You shouldn't need to touch
 // this yourself.
-const APP_VERSION = '18.11.2026.1100';
+const APP_VERSION = '25.11.2026.0620';
 
 /* ============================================================
    CONFIRM DIALOG (shared across all screens)
@@ -300,7 +300,10 @@ function nav(name, fromPopState){
     // The map sizes itself incorrectly if it was updated while its container was
     // hidden behind another screen (backgrounded journey) — fix it up now that
     // it's visible again.
-    setTimeout(()=>{ liveMap.resize(); if(currentTrip && currentTrip.path.length) updateLiveMapTrack(currentTrip.path); }, 50);
+    // Check liveMap again when the timer fires, not just when it's set: starting a
+    // new sail calls nav('active') and then startLiveConnCheck(), which removes the
+    // old map (liveMap = null) before these 50 ms are up (fix 25.11.2026).
+    setTimeout(()=>{ if(!liveMap) return; liveMap.resize(); if(currentTrip && currentTrip.path.length) updateLiveMapTrack(currentTrip.path); }, 50);
   }
   updateRecordingBanner(name);
 }

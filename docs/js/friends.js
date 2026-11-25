@@ -358,7 +358,9 @@ async function loadFriendsData(){
       JSON.stringify([friendsState.me, friendsState.rows, friendsState.people]) === JSON.stringify([mine.data || null, rows, people]);
     friendsState = { loaded:true, loading:false, failed:false, me: mine.data || null, rows, people };
   }catch(e){
-    console.error('friends load failed', e);
+    // No signal: expected, and the next check (every 20 s) will try again — so warn, don't report
+    if(isNetworkError(e)) console.warn('friends load failed (no connection)', e);
+    else console.error('friends load failed', e);
     friendsState.failed = !friendsState.loaded;
   }finally{
     friendsState.loading = false;

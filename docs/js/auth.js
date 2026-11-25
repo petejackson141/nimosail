@@ -1074,7 +1074,9 @@ async function pushTripToCloudImpl(trip){
     if(error) throw error;
     return { ok:true };
   }catch(e){
-    console.error('trip cloud push failed', e);
+    // No signal: the caller keeps the sail in the waiting-to-upload list, so warn, don't report
+    if(isNetworkError(e)) console.warn('trip cloud push failed (no connection)', e);
+    else console.error('trip cloud push failed', e);
     return { ok:false, message: e.message || String(e) };
   }
 }
@@ -1088,7 +1090,8 @@ async function syncTripIfSignedIn(trip){
   if(!state.user) return;
   const result = await pushTripToCloud(trip);
   if(result.ok){ await tripUploadPendingRemove(trip.id); return; }
-  console.error('background trip sync failed', result.message);
+  if(isNetworkError(result.message)) console.warn('background trip sync failed (no connection)', result.message);
+  else console.error('background trip sync failed', result.message);
   // Most likely no signal (e.g. ending a sail out at sea). The sail is
   // already safe on the phone; note its id so it gets uploaded as soon as
   // the phone is back online or the app comes back to the front.
