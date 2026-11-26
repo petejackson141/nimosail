@@ -518,7 +518,7 @@
   .auth-hero-icon svg{ width:30px; height:30px; color:var(--navy-deep); }
   .auth-hero h3{ margin-bottom:6px; }
   .auth-hero p{ font-size:13px; color:var(--ink-muted); max-width:280px; }
-  .input-icon-field{ position:relative; }
+  .input-icon-field .input-wrap{ position:relative; } /* icons centre on the input only, not label+input */
   .input-icon-field svg.field-icon{ position:absolute; left:14px; top:50%; transform:translateY(-50%);
     width:17px; height:17px; color:var(--ink-muted); pointer-events:none; }
   .input-icon-field input{ padding-left:42px !important; }
@@ -526,6 +526,9 @@
   .password-toggle-btn{ position:absolute; right:6px; top:50%; transform:translateY(-50%); background:none; border:none;
     padding:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--ink-muted); }
   .password-toggle-btn.is-active{ color:var(--navy); }
+  .auth-pw-hint{ font-size:12px; color:var(--ink-muted); margin:6px 2px 0; }
+  #authToggleModeBtn{ color:var(--navy); font-weight:600; }
+  html[data-theme="dark"] #authToggleModeBtn{ color:var(--gold); }
   .auth-forgot-btn{ display:block; margin:-6px 0 10px auto; background:none; border:none; padding:4px 2px; font:inherit; font-size:13px; font-weight:600; color:var(--navy); cursor:pointer; }
   html[data-theme="dark"] .auth-forgot-btn{ color:var(--gold); }
   .auth-info-msg{ font-size:13px; line-height:1.45; color:var(--ink); background:rgba(46,160,110,.12); border-radius:10px; padding:10px 12px; margin:0 0 10px; }
@@ -2401,17 +2404,23 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
       <p id="authSheetHint">Sign in to sync your journeys across devices.</p>
     </div>
     <div class="field input-icon-field">
-      <label data-i18n="auth.email">Email</label>
-      <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
-      <input type="email" id="authEmail" placeholder="you@email.com" autocomplete="email">
+      <label for="authEmail" data-i18n="auth.email">Email</label>
+      <div class="input-wrap">
+        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
+        <input type="email" id="authEmail" placeholder="you@email.com" autocomplete="email">
+      </div>
     </div>
     <div class="field input-icon-field" id="authPasswordField">
-      <label data-i18n="auth.password">Password</label>
-      <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-      <input type="password" id="authPassword" placeholder="At least 6 characters" data-i18n-ph="auth.passwordPh" autocomplete="current-password">
-      <button type="button" class="password-toggle-btn" id="authPasswordToggle" onclick="togglePasswordVisibility()" aria-label="Show password">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
+      <label for="authPassword" data-i18n="auth.password">Password</label>
+      <div class="input-wrap">
+        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <input type="password" id="authPassword" placeholder="At least 6 characters" data-i18n-ph="auth.passwordPh" autocomplete="current-password">
+        <button type="button" class="password-toggle-btn" id="authPasswordToggle" onclick="togglePasswordVisibility()" aria-label="Show password">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <!-- Sign-up only (js/auth.js → updateAuthSheetLabels): the placeholder vanishes once you type. -->
+      <p class="auth-pw-hint" id="authPwHint" data-i18n="auth.passwordPh" style="display:none;">At least 6 characters</p>
     </div>
     <button type="button" class="auth-forgot-btn" id="authForgotBtn" onclick="openForgotPassword()" data-i18n="auth.forgot">Forgot password?</button>
     <p id="authErrorMsg" style="font-size:12.5px;color:var(--coral);display:none;"></p>
@@ -2432,14 +2441,18 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
       <p data-i18n="auth.newPwHint">You're signed in from the reset link. Pick a new password for your account.</p>
     </div>
     <div class="field input-icon-field">
-      <label data-i18n="auth.newPw">New password</label>
-      <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-      <input type="password" id="newPassword1" placeholder="At least 6 characters" data-i18n-ph="auth.passwordPh" autocomplete="new-password">
+      <label for="newPassword1" data-i18n="auth.newPw">New password</label>
+      <div class="input-wrap">
+        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <input type="password" id="newPassword1" placeholder="At least 6 characters" data-i18n-ph="auth.passwordPh" autocomplete="new-password">
+      </div>
     </div>
     <div class="field input-icon-field">
-      <label data-i18n="auth.newPw2">Type it again</label>
-      <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-      <input type="password" id="newPassword2" autocomplete="new-password">
+      <label for="newPassword2" data-i18n="auth.newPw2">Type it again</label>
+      <div class="input-wrap">
+        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        <input type="password" id="newPassword2" autocomplete="new-password">
+      </div>
     </div>
     <p id="newPwErrorMsg" style="font-size:12.5px;color:var(--coral);display:none;"></p>
     <button class="btn btn-primary" id="newPwSaveBtn" style="margin-top:4px;" onclick="submitNewPassword()" data-i18n="auth.newPwSave">Save new password</button>

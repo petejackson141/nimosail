@@ -492,6 +492,10 @@ function updateAuthSheetLabels(){
   // Password box hidden while resetting; "Forgot password?" only when signing in.
   document.getElementById('authPasswordField').style.display = isReset ? 'none' : '';
   document.getElementById('authForgotBtn').style.display = authMode === 'signin' ? '' : 'none';
+  // Sign-up: show the 6-character rule (the placeholder disappears once you type) and tell
+  // password managers this is a NEW password, so they offer a strong one and save it.
+  document.getElementById('authPwHint').style.display = isSignUp ? '' : 'none';
+  document.getElementById('authPassword').setAttribute('autocomplete', isSignUp ? 'new-password' : 'current-password');
   hideAuthInfo();
 }
 
