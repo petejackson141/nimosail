@@ -229,7 +229,7 @@ async function applyAutoWeather(lat, lng){
       if(dir){ document.getElementById('windDir').value = dir; filledAny = true; }
       if(wx.wind_speed_10m!=null){ document.getElementById('windSpeed').value = Math.max(0,Math.min(19,Math.round(wx.wind_speed_10m))); updateWindSpeedLabel(); filledAny = true; }
       if(wx.wind_gusts_10m!=null){ document.getElementById('gusts').value = Math.max(0,Math.min(40,Math.round(wx.wind_gusts_10m))); updateGustsLabel(); filledAny = true; }
-      if(wx.temperature_2m!=null){ document.getElementById('temp').value = Math.max(0,Math.min(50,Math.round(wx.temperature_2m))); updateTempLabel(); filledAny = true; }
+      if(wx.temperature_2m!=null){ document.getElementById('temp').value = Math.max(-20,Math.min(50,Math.round(wx.temperature_2m))); updateTempLabel(); filledAny = true; }
       const sky = weatherCodeToSky(wx.weather_code);
       if(sky){ document.getElementById('sky').value = sky; filledAny = true; }
     }

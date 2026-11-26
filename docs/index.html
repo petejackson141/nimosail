@@ -1406,8 +1406,8 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
 
       <div id="manualDistanceWrap" style="display:none;">
         <div class="field" style="margin-top:16px;">
-          <label id="manualDistanceLabel">Distance covered — NM (manual entry, GPS unavailable)</label>
-          <input type="number" step="0.1" min="0" id="manualDistance" placeholder="e.g. 12.4" data-i18n-ph="ph.egDistance">
+          <label for="manualDistance" id="manualDistanceLabel">Distance covered — NM (manual entry, GPS unavailable)</label>
+          <input inputmode="decimal" type="number" step="0.1" min="0" id="manualDistance" placeholder="e.g. 12.4" data-i18n-ph="ph.egDistance">
         </div>
       </div>
     </div>
@@ -1446,17 +1446,17 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
       <div class="form-card">
         <div class="form-card-head"><span class="fc-icon coral" aria-hidden="true">⏱️</span><span class="fc-title" data-i18n="active.passage">Duration &amp; Distance</span></div>
         <div class="two-col">
-          <div class="field"><label data-i18n="active.durationHrs">Duration (hrs)</label><input type="number" min="0" step="1" inputmode="numeric" id="pastHours" placeholder="e.g. 3" data-i18n-ph="ph.egHours"></div>
-          <div class="field"><label data-i18n="active.durationMins">Duration (mins)</label><input type="number" min="0" max="59" step="1" inputmode="numeric" id="pastMinutes" placeholder="e.g. 30" data-i18n-ph="ph.egMinutes"></div>
+          <div class="field"><label for="pastHours" data-i18n="active.durationHrs">Duration (hrs)</label><input type="number" min="0" step="1" inputmode="numeric" id="pastHours" placeholder="e.g. 3" data-i18n-ph="ph.egHours"></div>
+          <div class="field"><label for="pastMinutes" data-i18n="active.durationMins">Duration (mins)</label><input type="number" min="0" max="59" step="1" inputmode="numeric" id="pastMinutes" placeholder="e.g. 30" data-i18n-ph="ph.egMinutes"></div>
         </div>
         <div class="field">
-          <label id="pastDistanceLabel">Distance (NM)</label>
+          <label for="pastDistance" id="pastDistanceLabel">Distance (NM)</label>
           <input type="number" step="0.1" min="0" inputmode="decimal" id="pastDistance" placeholder="e.g. 12.4" data-i18n-ph="ph.egDistance">
         </div>
         <div class="fc-divider"></div>
         <div class="two-col">
-          <div class="field"><label id="pastAvgSpeedLabel">Avg Speed (kts)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="pastAvgSpeed" placeholder="auto" data-i18n-ph="ph.auto"></div>
-          <div class="field"><label id="pastMaxSpeedLabel">Max Speed (kts)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="pastMaxSpeed" placeholder="auto" data-i18n-ph="ph.auto"></div>
+          <div class="field"><label for="pastAvgSpeed" id="pastAvgSpeedLabel">Avg Speed (kts)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="pastAvgSpeed" placeholder="auto" data-i18n-ph="ph.auto"></div>
+          <div class="field"><label for="pastMaxSpeed" id="pastMaxSpeedLabel">Max Speed (kts)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="pastMaxSpeed" placeholder="auto" data-i18n-ph="ph.auto"></div>
         </div>
         <p class="fc-hint" data-i18n="active.autoCalcHint">Optional — leave blank and these are worked out from distance ÷ duration.</p>
       </div>
@@ -1497,15 +1497,15 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
     <div class="form-card">
     <div class="form-card-head"><span class="fc-icon teal" aria-hidden="true">📝</span><span class="fc-title" data-i18n="active.logEntry">Log Entry</span></div>
     <div class="field">
-      <label data-i18n="active.boat">Boat</label>
+      <label for="activeBoatSelect" data-i18n="active.boat">Boat</label>
       <select id="activeBoatSelect"></select>
     </div>
     <div class="field">
-      <label data-i18n="active.sailName">Sail Name</label>
+      <label for="tripTitle" data-i18n="active.sailName">Sail Name</label>
       <input type="text" id="tripTitle" placeholder="e.g. Sunset Cruise" data-i18n-ph="ph.egSailName">
     </div>
     <div class="field">
-      <label data-i18n="active.place">Place</label>
+      <label for="tripPlace" data-i18n="active.place">Place</label>
       <input type="text" id="tripPlace" placeholder="e.g. Chesapeake Bay" data-i18n-ph="ph.egPlace">
     </div>
     </div>
@@ -1513,7 +1513,7 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
     <div class="form-card">
     <div class="form-card-head"><span class="fc-icon coral" aria-hidden="true">🌤️</span><span class="fc-title" data-i18n="active.weatherSea">Weather &amp; Sea</span></div>
     <div class="field">
-      <label data-i18n="active.sky">General Conditions</label>
+      <label for="sky" data-i18n="active.sky">General Conditions</label>
       <select id="sky">
         <option data-i18n="sky.clear">Clear / Sunny</option>
         <option data-i18n="sky.partlyCloudy">Partly Cloudy</option>
@@ -1526,35 +1526,35 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
     </div>
     <div class="two-col">
       <div class="field">
-        <label data-i18n="active.windDir">Wind Direction</label>
+        <label for="windDir" data-i18n="active.windDir">Wind Direction</label>
         <select id="windDir"><option data-i18n="compass.N">N</option><option data-i18n="compass.NE">NE</option><option data-i18n="compass.E">E</option><option data-i18n="compass.SE">SE</option><option data-i18n="compass.S">S</option><option data-i18n="compass.SW">SW</option><option data-i18n="compass.W">W</option><option data-i18n="compass.NW">NW</option></select>
       </div>
       <div class="field">
-        <label data-i18n="active.seaState">Sea State</label>
+        <label for="seaState" data-i18n="active.seaState">Sea State</label>
         <select id="seaState"><option data-i18n="sea.calm">Calm</option><option data-i18n="sea.slight">Slight</option><option selected data-i18n="sea.moderate">Moderate</option><option data-i18n="sea.rough">Rough</option><option data-i18n="sea.veryRough">Very Rough</option></select>
       </div>
     </div>
     <div class="field">
-      <label><span data-i18n="active.windSpeed">Wind Speed</span> <span class="range-value" id="windSpeedVal">12 kts</span></label>
+      <label for="windSpeed"><span data-i18n="active.windSpeed">Wind Speed</span> <span class="range-value" id="windSpeedVal">12 kts</span></label>
       <input type="number" id="windSpeed" min="0" max="19" value="8" oninput="updateWindSpeedLabel()">
     </div>
     <div class="field">
-      <label><span data-i18n="active.gusts">Gusts</span> <span class="range-value" id="gustsVal">10 kts</span></label>
+      <label for="gusts"><span data-i18n="active.gusts">Gusts</span> <span class="range-value" id="gustsVal">10 kts</span></label>
       <input type="number" id="gusts" min="0" max="40" step="1" value="10" oninput="updateGustsLabel()">
     </div>
     <div class="two-col">
       <div class="field">
-        <label><span data-i18n="active.waveHeight">Wave Height</span> <span class="range-value" id="waveHeightVal">0.5 m</span></label>
-        <input type="number" id="waveHeight" min="0" max="5" step="0.1" value="0.5" oninput="updateWaveHeightLabel()">
+        <label for="waveHeight"><span data-i18n="active.waveHeight">Wave Height</span> <span class="range-value" id="waveHeightVal">0.5 m</span></label>
+        <input inputmode="decimal" type="number" id="waveHeight" min="0" max="5" step="0.1" value="0.5" oninput="updateWaveHeightLabel()">
       </div>
       <div class="field">
-        <label data-i18n="active.waveDir">Wave Direction</label>
+        <label for="waveDir" data-i18n="active.waveDir">Wave Direction</label>
         <select id="waveDir"><option data-i18n="compass.N">N</option><option data-i18n="compass.NE">NE</option><option data-i18n="compass.E">E</option><option data-i18n="compass.SE">SE</option><option data-i18n="compass.S">S</option><option data-i18n="compass.SW">SW</option><option data-i18n="compass.W">W</option><option data-i18n="compass.NW">NW</option></select>
       </div>
     </div>
     <div class="field">
-      <label><span data-i18n="active.temperature">Temperature</span> <span class="range-value" id="tempVal">20°C</span></label>
-      <input type="number" id="temp" min="0" max="50" step="1" value="20" oninput="updateTempLabel()">
+      <label for="temp"><span data-i18n="active.temperature">Temperature</span> <span class="range-value" id="tempVal">20°C</span></label>
+      <input type="number" id="temp" min="-20" max="50" step="1" value="20" oninput="updateTempLabel()">
     </div>
     </div>
 
@@ -1616,7 +1616,7 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
       <div class="iconbtn back-icon" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div>
       <h2 data-i18n="history.title">Trip History</h2>
     </div>
-    <input type="text" class="search-input" id="historySearch" placeholder="Search logs (e.g., boat, place, notes)…" oninput="renderHistory()" data-i18n-ph="history.searchPh">
+    <input autocapitalize="none" autocomplete="off" spellcheck="false" type="text" class="search-input" id="historySearch" placeholder="Search logs (e.g., boat, place, notes)…" oninput="renderHistory()" data-i18n-ph="history.searchPh">
     <div class="chiprow" id="historyChips">
       <div class="chip active" data-f="all" onclick="setHistoryFilter('all')" data-i18n="history.all">All</div>
       <div class="chip" data-f="recent" onclick="setHistoryFilter('recent')" data-i18n="history.recent">Recent</div>
@@ -1656,7 +1656,7 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
       </div>
       <div class="iconbtn" onclick="openBoatSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
     </div>
-    <input type="text" class="search-input" id="boatsSearch" placeholder="Search fleet (name, type, notes)…" oninput="renderBoats()" data-i18n-ph="boats.searchPh">
+    <input autocapitalize="none" autocomplete="off" spellcheck="false" type="text" class="search-input" id="boatsSearch" placeholder="Search fleet (name, type, notes)…" oninput="renderBoats()" data-i18n-ph="boats.searchPh">
     <div id="boatsList"></div>
   </section>
 
@@ -1670,7 +1670,7 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
       </div>
       <div class="iconbtn" onclick="openCrewSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
     </div>
-    <input type="text" class="search-input" id="crewSearch" placeholder="Search crew (name, contact, notes)…" oninput="renderCrew()" data-i18n-ph="crew.searchPh">
+    <input autocapitalize="none" autocomplete="off" spellcheck="false" type="text" class="search-input" id="crewSearch" placeholder="Search crew (name, contact, notes)…" oninput="renderCrew()" data-i18n-ph="crew.searchPh">
     <div id="crewList"></div>
   </section>
 
@@ -2074,8 +2074,8 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
       <div class="chip" data-r="custom" onclick="setResumeRange('custom')" data-i18n="resume.custom">Custom</div>
     </div>
     <div class="two-col" id="resumeCustomWrap" style="display:none;margin-top:8px;">
-      <div class="field"><label data-i18n="resume.from">From</label><input type="date" id="resumeFrom" onchange="renderResume()"></div>
-      <div class="field"><label data-i18n="resume.to">To</label><input type="date" id="resumeTo" onchange="renderResume()"></div>
+      <div class="field"><label for="resumeFrom" data-i18n="resume.from">From</label><input type="date" id="resumeFrom" onchange="renderResume()"></div>
+      <div class="field"><label for="resumeTo" data-i18n="resume.to">To</label><input type="date" id="resumeTo" onchange="renderResume()"></div>
     </div>
 
     <div class="stat-card stat-grid resume-stats" style="margin-top:10px;">
@@ -2135,7 +2135,7 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
     <div class="sheet-handle"></div>
     <h3 data-i18n="sheet.startJourneyTitle">Start a New Journey</h3>
     <div class="field">
-      <label data-i18n="sheet.whichBoat">Which boat?</label>
+      <label for="startBoatSelect" data-i18n="sheet.whichBoat">Which boat?</label>
       <select id="startBoatSelect"></select>
       <p style="font-size:12px;margin-top:4px;" data-i18n="sheet.whichBoatHint">Choose which boat you're taking out — this gets saved with the log entry.</p>
     </div>
@@ -2184,7 +2184,7 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
   <div class="sheet" id="sheetNoticeboard" style="display:none;">
     <div class="sheet-handle"></div>
     <h3 id="noticeboardSheetTitle">New Plan</h3>
-    <div class="field"><label data-i18n="noticeboard.what">What's the plan?</label><input type="text" id="noticeboardTitle" placeholder="e.g. Weekend sail to Cyprus" data-i18n-ph="noticeboard.whatPh"></div>
+    <div class="field"><label for="noticeboardTitle" data-i18n="noticeboard.what">What's the plan?</label><input type="text" id="noticeboardTitle" placeholder="e.g. Weekend sail to Cyprus" data-i18n-ph="noticeboard.whatPh"></div>
     <div class="field">
       <label data-i18n="noticeboard.when">When</label>
       <div class="when-row" style="grid-template-columns:1.15fr 1fr;">
@@ -2198,9 +2198,9 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
         </button>
       </div>
     </div>
-    <div class="field"><label data-i18n="noticeboard.place">Place</label><input type="text" id="noticeboardPlace" placeholder="e.g. Herzliya Marina" data-i18n-ph="noticeboard.placePh"></div>
-    <div class="field"><label data-i18n="noticeboard.boat">Boat</label><select id="noticeboardBoat"></select></div>
-    <div class="field"><label data-i18n="active.notes">Notes</label><textarea id="noticeboardNotes" placeholder="Who's coming, what to bring, plans for the day…" data-i18n-ph="noticeboard.notesPh"></textarea></div>
+    <div class="field"><label for="noticeboardPlace" data-i18n="noticeboard.place">Place</label><input type="text" id="noticeboardPlace" placeholder="e.g. Herzliya Marina" data-i18n-ph="noticeboard.placePh"></div>
+    <div class="field"><label for="noticeboardBoat" data-i18n="noticeboard.boat">Boat</label><select id="noticeboardBoat"></select></div>
+    <div class="field"><label for="noticeboardNotes" data-i18n="active.notes">Notes</label><textarea id="noticeboardNotes" placeholder="Who's coming, what to bring, plans for the day…" data-i18n-ph="noticeboard.notesPh"></textarea></div>
     <!-- Who can see this plan (Only me / Friends) — shown when editing a plan while signed in; see refreshNoticeboardVisibility() in noticeboard.js -->
     <div class="field" id="noticeboardVisRow" style="display:none;"><label data-i18n="plan.whoCanSee">Who can see this?</label><div><div class="vis-chip" style="margin-top:2px;" onclick="toggleNoticeboardVisibility()"></div></div></div>
     <button class="btn btn-primary" onclick="saveNoticeboardForm()" data-i18n="noticeboard.save">Save Plan</button>
@@ -2212,35 +2212,35 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
     <div class="sheet-handle"></div>
     <h3 data-i18n="profile.editProfile">Edit Profile</h3>
     <div class="field">
-      <label data-i18n="profile.name">Name</label>
-      <input type="text" id="profileName" placeholder="Your name" data-i18n-ph="profile.namePh">
+      <label for="profileName" data-i18n="profile.name">Name</label>
+      <input autocomplete="name" type="text" id="profileName" placeholder="Your name" data-i18n-ph="profile.namePh">
     </div>
     <div class="two-col">
       <div class="field">
-        <label data-i18n="profile.role">Role</label>
+        <label for="profileRole" data-i18n="profile.role">Role</label>
         <input type="text" id="profileRole" placeholder="e.g. Skipper" data-i18n-ph="profile.rolePh">
       </div>
       <div class="field">
-        <label data-i18n="profile.license">License</label>
+        <label for="profileLicense" data-i18n="profile.license">License</label>
         <input type="text" id="profileLicense" placeholder="e.g. RYA Day Skipper" data-i18n-ph="profile.licensePh">
       </div>
     </div>
     <div class="two-col">
       <div class="field">
-        <label data-i18n="profile.phone">Phone</label>
-        <input type="tel" id="profilePhone" placeholder="e.g. +1 555 123 4567">
+        <label for="profilePhone" data-i18n="profile.phone">Phone</label>
+        <input autocomplete="tel" type="tel" id="profilePhone" placeholder="e.g. +1 555 123 4567">
       </div>
       <div class="field">
-        <label data-i18n="profile.email">Email</label>
-        <input type="email" id="profileEmail" placeholder="e.g. you@email.com">
+        <label for="profileEmail" data-i18n="profile.email">Email</label>
+        <input autocomplete="email" type="email" id="profileEmail" placeholder="e.g. you@email.com">
       </div>
     </div>
     <div class="field">
-      <label data-i18n="profile.social">Social / Website</label>
+      <label for="profileSocial" data-i18n="profile.social">Social / Website</label>
       <input type="text" id="profileSocial" placeholder="e.g. @you or instagram.com/you">
     </div>
     <div class="field">
-      <label data-i18n="profile.bio">Bio</label>
+      <label for="profileBio" data-i18n="profile.bio">Bio</label>
       <textarea id="profileBio" placeholder="Tell your crew a bit about yourself and your sailing…" data-i18n-ph="profile.bioPh"></textarea>
     </div>
     <button class="btn btn-primary" onclick="saveProfileForm()" data-i18n="profile.save">Save Profile</button>
@@ -2261,9 +2261,9 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
     </div>
     <input type="file" id="boatCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleBoatPhoto(event)">
     <input type="file" id="boatUploadInput" accept="image/*" multiple style="display:none;" onchange="handleBoatPhoto(event)">
-    <div class="field"><label data-i18n="sheet.boatName">Name</label><input type="text" id="boatName" placeholder="e.g. Windswept" data-i18n-ph="sheet.boatNamePh"></div>
-    <div class="field"><label data-i18n="sheet.boatType">Type</label><input type="text" id="boatType" placeholder="e.g. Beneteau Oceanis 38" data-i18n-ph="sheet.boatTypePh"></div>
-    <div class="field"><label data-i18n="active.notes">Notes</label><textarea id="boatNotes" placeholder="Home marina, rig details, quirks…" data-i18n-ph="sheet.boatNotesPh"></textarea></div>
+    <div class="field"><label for="boatName" data-i18n="sheet.boatName">Name</label><input type="text" id="boatName" placeholder="e.g. Windswept" data-i18n-ph="sheet.boatNamePh"></div>
+    <div class="field"><label for="boatType" data-i18n="sheet.boatType">Type</label><input type="text" id="boatType" placeholder="e.g. Beneteau Oceanis 38" data-i18n-ph="sheet.boatTypePh"></div>
+    <div class="field"><label for="boatNotes" data-i18n="active.notes">Notes</label><textarea id="boatNotes" placeholder="Home marina, rig details, quirks…" data-i18n-ph="sheet.boatNotesPh"></textarea></div>
     <button class="btn btn-primary" onclick="saveBoatForm()" data-i18n="sheet.saveBoat">Save Boat</button>
     <button class="btn btn-ghost" id="deleteBoatBtn" style="display:none;color:var(--coral);" onclick="deleteBoatForm()" data-i18n="sheet.removeBoat">Remove Boat</button>
   </div>
@@ -2280,13 +2280,13 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
       <input type="file" id="crewSelfieInput" accept="image/*" capture="user" style="display:none;" onchange="handleCrewPhoto(event)">
       <input type="file" id="crewPhotoInput" accept="image/*" style="display:none;" onchange="handleCrewPhoto(event)">
     </div>
-    <div class="field"><label data-i18n="profile.name">Name</label><input type="text" id="crewName" placeholder="e.g. Alex" data-i18n-ph="sheet.crewNamePh"></div>
+    <div class="field"><label for="crewName" data-i18n="profile.name">Name</label><input autocomplete="off" type="text" id="crewName" placeholder="e.g. Alex" data-i18n-ph="sheet.crewNamePh"></div>
     <div class="two-col">
-      <div class="field"><label data-i18n="profile.phone">Phone</label><input type="tel" id="crewPhone" placeholder="e.g. +1 555 123 4567"></div>
-      <div class="field"><label data-i18n="profile.email">Email</label><input type="email" id="crewEmail" placeholder="e.g. alex@email.com" data-i18n-ph="sheet.crewEmailPh"></div>
+      <div class="field"><label for="crewPhone" data-i18n="profile.phone">Phone</label><input autocomplete="off" type="tel" id="crewPhone" placeholder="e.g. +1 555 123 4567"></div>
+      <div class="field"><label for="crewEmail" data-i18n="profile.email">Email</label><input autocomplete="off" type="email" id="crewEmail" placeholder="e.g. alex@email.com" data-i18n-ph="sheet.crewEmailPh"></div>
     </div>
-    <div class="field"><label data-i18n="profile.social">Social / Website</label><input type="text" id="crewSocial" placeholder="e.g. @alex or instagram.com/alex" data-i18n-ph="sheet.crewSocialPh"></div>
-    <div class="field"><label data-i18n="sheet.note">Note</label><textarea id="crewNote" placeholder="How you know them, role aboard…" data-i18n-ph="sheet.crewNotePh"></textarea></div>
+    <div class="field"><label for="crewSocial" data-i18n="profile.social">Social / Website</label><input type="text" id="crewSocial" placeholder="e.g. @alex or instagram.com/alex" data-i18n-ph="sheet.crewSocialPh"></div>
+    <div class="field"><label for="crewNote" data-i18n="sheet.note">Note</label><textarea id="crewNote" placeholder="How you know them, role aboard…" data-i18n-ph="sheet.crewNotePh"></textarea></div>
     <!-- Linked friend / "Link to a friend" (js/crew-friends.js) -->
     <div id="crewFriendLink"></div>
     <button class="btn btn-primary" onclick="saveCrewForm()" data-i18n="action.save">Save</button>
@@ -2385,8 +2385,8 @@ html[dir="rtl"] .password-toggle-btn{ right:auto; left:6px; }
     <p style="font-size:12.5px;margin:-4px 0 10px;" data-i18n="sheet.certHint">Uses the sails in the range selected on the Resume screen.</p>
     <div class="pdf-theme-picker" id="certKindPicker"></div>
     <p id="certKindHint" style="font-size:12.5px;margin:-4px 0 12px;"></p>
-    <div class="field"><label data-i18n="sheet.certTitle">Certificate Title</label><input type="text" id="certTitle"></div>
-    <div class="field"><label data-i18n="sheet.sailorName">Sailor Name</label><input type="text" id="certName"></div>
+    <div class="field"><label for="certTitle" data-i18n="sheet.certTitle">Certificate Title</label><input type="text" id="certTitle"></div>
+    <div class="field"><label for="certName" data-i18n="sheet.sailorName">Sailor Name</label><input type="text" id="certName"></div>
     <button class="btn btn-primary" onclick="renderCertificate()" data-i18n="sheet.generate">Generate</button>
     <div id="certificateOutput"></div>
     <div id="certActions" style="display:none;">
